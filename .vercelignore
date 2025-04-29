@@ -1,0 +1,22 @@
+# Ignore development files
+.git
+.github
+.vscode
+node_modules
+README.md
+.gitignore
+.env.local
+.env.development
+.env.test
+
+# Ignore test files
+__tests__
+*.test.*
+*.spec.*
+
+# Ignore documentation
+docs
+*.md
+
+# Ignore large assets that can be loaded dynamically
+public/large-assets
