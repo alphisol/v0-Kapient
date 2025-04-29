@@ -25,7 +25,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
-  // Update the menuItems array to include the new technical SEO page and remove Technical Issues
+  // Update the menuItems array to include a documentation link
   const menuItems = [
     { icon: Home, label: "Dashboard", href: "/" },
     { icon: Globe, label: "Website Status", href: "/website-status" },
@@ -37,6 +37,7 @@ export function Sidebar() {
     { icon: Star, label: "Business Presence", href: "/business-presence" },
     { icon: Search, label: "SEO Factors", href: "/seo-factors" },
     { icon: ShieldCheck, label: "Security", href: "/security" },
+    { icon: FileCode, label: "Documentation", href: "/documentation/data-sources" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ]
 
