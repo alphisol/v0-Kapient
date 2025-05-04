@@ -1,5 +1,15 @@
-import { ComingSoon } from "@/components/coming-soon"
+import { SettingsLayout } from "@/components/settings/settings-layout"
+import { GeneralInfoSettings } from "@/components/settings/general-info-settings"
+
+export const metadata = {
+  title: "Account Settings | Kapient SEO Dashboard",
+  description: "Manage your account settings and preferences",
+}
 
 export default function SettingsPage() {
-  return <ComingSoon title="Settings" description="Customize your dashboard and notification preferences." />
+  return (
+    <SettingsLayout>
+      <GeneralInfoSettings />
+    </SettingsLayout>
+  )
 }

@@ -3,21 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  BarChart3,
-  Globe,
-  Home,
-  Menu,
-  MessageSquare,
-  Phone,
-  Search,
-  Server,
-  Settings,
-  ShieldCheck,
-  Star,
-  X,
-  FileCode,
-} from "lucide-react"
+import { Home, Menu, Mail, Server, Settings, FileCode, X, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -25,18 +11,13 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
-  // Update the menuItems array to include a documentation link
+  // Updated menuItems array - removed Website Status and Website Traffic
   const menuItems = [
     { icon: Home, label: "Dashboard", href: "/" },
-    { icon: Globe, label: "Website Status", href: "/website-status" },
-    { icon: BarChart3, label: "Website Traffic", href: "/website-traffic" },
     { icon: Server, label: "Server Health", href: "/server-health" },
     { icon: FileCode, label: "Technical SEO", href: "/technical-seo" },
-    { icon: MessageSquare, label: "Form Performance", href: "/form-performance" },
-    { icon: Phone, label: "Communications", href: "/communications" },
-    { icon: Star, label: "Business Presence", href: "/business-presence" },
-    { icon: Search, label: "SEO Factors", href: "/seo-factors" },
-    { icon: ShieldCheck, label: "Security", href: "/security" },
+    { icon: Mail, label: "Email Deliverability", href: "/email-deliverability" },
+    { icon: Star, label: "Reputation Management", href: "/reputation-management" },
     { icon: FileCode, label: "Documentation", href: "/documentation/data-sources" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ]
@@ -47,6 +28,17 @@ export function Sidebar() {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false)
+
+    // Add event listener for custom sidebar toggle
+    const handleSidebarToggle = () => {
+      setIsMobileMenuOpen((prev) => !prev)
+    }
+
+    document.addEventListener("sidebarToggle", handleSidebarToggle)
+
+    return () => {
+      document.removeEventListener("sidebarToggle", handleSidebarToggle)
+    }
   }, [pathname])
 
   // Close mobile menu when window is resized to desktop size
@@ -89,36 +81,11 @@ export function Sidebar() {
         className={cn(
           "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col z-30",
           collapsed ? "w-16" : "w-64",
-          "fixed h-full md:sticky top-0 left-0",
+          "fixed h-[calc(100vh-4rem)] md:sticky top-16 left-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          "sidebar-container",
         )}
       >
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          {!collapsed && <div className="font-bold text-xl text-kapient-blue">Kapient</div>}
-          {collapsed && (
-            <div className="w-full flex justify-center">
-              <div className="font-bold text-xl text-kapient-blue">K</div>
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="ml-auto hidden md:flex"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? "→" : "←"}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="ml-auto md:hidden"
-            aria-label="Close menu"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
         <div className="flex-1 py-4 overflow-y-auto">
           <nav className="space-y-1 px-2">
             {menuItems.map((item) => {
