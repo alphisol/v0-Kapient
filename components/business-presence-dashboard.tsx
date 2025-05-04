@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, ArrowUp, ArrowDown, ExternalLink } from "lucide-react"
+import { ArrowRight, ArrowUp, ArrowDown, ExternalLink, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -48,6 +48,46 @@ const businessListings = [
     rating: 4.3,
     reviews: 42,
     lastUpdated: "2023-11-28",
+  },
+]
+
+// Mock data for business information comparison
+const businessInfoComparison = [
+  {
+    field: "Business Name",
+    yourInfo: "Acme Inc.",
+    onlineInfo: "Acme Inc.",
+    match: true,
+  },
+  {
+    field: "Address",
+    yourInfo: "123 Business Ave, Suite 101",
+    onlineInfo: "123 Business Avenue, Suite 101",
+    match: false,
+  },
+  {
+    field: "City",
+    yourInfo: "San Francisco",
+    onlineInfo: "San Francisco",
+    match: true,
+  },
+  {
+    field: "State",
+    yourInfo: "CA",
+    onlineInfo: "CA",
+    match: true,
+  },
+  {
+    field: "Phone",
+    yourInfo: "(415) 555-1234",
+    onlineInfo: "(415) 555-1234",
+    match: true,
+  },
+  {
+    field: "Website",
+    yourInfo: "www.acmeinc.com",
+    onlineInfo: "www.acme-inc.com",
+    match: false,
   },
 ]
 
@@ -160,9 +200,41 @@ export function BusinessPresenceDashboard() {
             </div>
           </div>
 
-          <div className="mt-8">
+          {/* Business Information Comparison */}
+          <div className="mt-8 w-full">
             <h4 className="text-lg font-medium mb-4">Business Information Comparison</h4>
-            {/* Business information comparison would go here */}
+
+            <div className="border rounded-md overflow-hidden">
+              {businessInfoComparison.map((item, index) => (
+                <div key={index} className="border-b last:border-b-0">
+                  <div className="bg-gray-50 px-4 py-3 font-medium">{item.field}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x">
+                    <div className="px-4 py-3">
+                      <div className="text-sm text-gray-500 mb-1">Your Information</div>
+                      <div>{item.yourInfo}</div>
+                    </div>
+                    <div className="px-4 py-3">
+                      <div className="text-sm text-gray-500 mb-1">Online Listing</div>
+                      <div className="flex items-center justify-between">
+                        <div className={item.match ? "text-green-500" : "text-red-500"}>{item.onlineInfo}</div>
+                        <div>
+                          {item.match ? (
+                            <Check className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <div className="flex flex-col items-end">
+                              <X className="h-5 w-5 text-red-500 mb-2" />
+                              <Button size="sm" className="bg-kapient-blue hover:bg-kapient-blue/90">
+                                Fix it
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
