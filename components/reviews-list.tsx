@@ -1,87 +1,55 @@
 "use client"
 
-import Image from "next/image"
-import { formatDistanceToNow } from "date-fns"
-
 export function ReviewsList() {
   const reviews = [
     {
       id: 1,
-      author: "John Smith",
+      name: "John Smith",
+      avatar: "/avatar-john.jpg",
+      rating: 5,
+      date: "May 15, 2023",
+      content: "Great service! The team was very professional and responsive to our needs.",
       platform: "Google",
-      platformLogo: "/google-logo.png",
-      profilePicture: null,
-      rating: 5,
-      content: "Great service! The team was very professional and responsive to all my questions.",
-      date: new Date(2023, 4, 15),
     },
-    {
-      id: 2,
-      author: "Sarah Johnson",
-      platform: "Yelp",
-      platformLogo: "/yelp-icon.svg",
-      profilePicture: null,
-      rating: 4,
-      content: "Very good experience overall. Would recommend to others looking for similar services.",
-      date: new Date(2023, 4, 10),
-    },
-    {
-      id: 3,
-      author: "Michael Brown",
-      platform: "Facebook",
-      platformLogo: "/facebook-icon.svg",
-      profilePicture: null,
-      rating: 5,
-      content: "Excellent customer service and very knowledgeable staff. Will definitely use again!",
-      date: new Date(2023, 4, 5),
-    },
-    {
-      id: 4,
-      author: "Emily Davis",
-      platform: "Trustpilot",
-      platformLogo: null,
-      profilePicture: null,
-      rating: 3,
-      content: "Service was okay but took longer than expected. Room for improvement.",
-      date: new Date(2023, 4, 1),
-    },
+    // Add more reviews as needed
   ]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {reviews.map((review) => (
-        <div key={review.id} className="border rounded-lg p-4">
-          <div className="flex items-start justify-between">
+        <div key={review.id} className="border-b pb-6 last:border-b-0">
+          <div className="flex justify-between items-start">
             <div className="flex items-center">
-              <div className="mr-3">
-                <Image src="/user-icon.png" alt={review.author} width={40} height={40} className="rounded-full" />
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
+                <img
+                  src={review.avatar || "/placeholder.svg"}
+                  alt={review.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://via.placeholder.com/40x40?text=${review.name.charAt(0)}`
+                  }}
+                />
               </div>
               <div>
-                <div className="font-medium">{review.author}</div>
-                <div className="flex items-center text-sm text-gray-500">
-                  {review.platformLogo ? (
-                    <Image
-                      src={review.platformLogo || "/placeholder.svg"}
-                      alt={review.platform}
-                      width={16}
-                      height={16}
-                      className="mr-1"
-                    />
-                  ) : (
-                    <span className="mr-1">{review.platform}</span>
-                  )}
-                  <span className="mx-1">•</span>
-                  <span>{formatDistanceToNow(review.date, { addSuffix: true })}</span>
-                </div>
+                <div className="font-medium">{review.name}</div>
+                <div className="text-sm text-gray-500">{review.date}</div>
               </div>
             </div>
-            <div className="flex text-amber-500">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>{i < review.rating ? "★" : "☆"}</span>
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg
+                  key={i}
+                  className={`w-4 h-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
               ))}
             </div>
           </div>
-          <div className="mt-2">{review.content}</div>
+          <div className="mt-3">{review.content}</div>
+          <div className="mt-2 text-sm text-gray-500">Via {review.platform}</div>
         </div>
       ))}
     </div>

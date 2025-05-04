@@ -1,5 +1,5 @@
-import { BusinessPresenceDashboard } from "@/components/business-presence-dashboard"
+import { redirect } from "next/navigation"
 
-export default function BusinessPresencePage() {
-  return <BusinessPresenceDashboard />
+export default function BusinessPresenceRedirect() {
+  redirect("/reputation-management/business-presence")
 }

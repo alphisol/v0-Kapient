@@ -1,113 +1,119 @@
 "use client"
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  BarChart,
-  Bar,
-  Cell,
-} from "recharts"
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function ReviewsAnalytics() {
-  // Mock data for the line chart
-  const lineData = [
-    { month: "Jun", rating: 4.2, reviews: 8 },
-    { month: "Jul", rating: 4.3, reviews: 12 },
-    { month: "Aug", rating: 4.1, reviews: 10 },
-    { month: "Sep", rating: 4.4, reviews: 15 },
-    { month: "Oct", rating: 4.6, reviews: 18 },
-    { month: "Nov", rating: 4.7, reviews: 22 },
-    { month: "Dec", rating: 4.5, reviews: 20 },
-    { month: "Jan", rating: 4.8, reviews: 25 },
-    { month: "Feb", rating: 4.7, reviews: 23 },
-    { month: "Mar", rating: 4.9, reviews: 28 },
-    { month: "Apr", rating: 4.8, reviews: 26 },
-    { month: "May", rating: 4.9, reviews: 30 },
-  ]
-
-  // Mock data for the bar chart
-  const barData = [
-    { name: "5 Stars", value: 87, color: "#10b981" },
-    { name: "4 Stars", value: 32, color: "#60a5fa" },
-    { name: "3 Stars", value: 14, color: "#fbbf24" },
-    { name: "2 Stars", value: 6, color: "#f97316" },
-    { name: "1 Star", value: 3, color: "#ef4444" },
-  ]
+  const [activeTab, setActiveTab] = useState("rating-trend")
 
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="trend">
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Reviews Analytics</h2>
+
+      <Tabs defaultValue="rating-trend" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
-          <TabsTrigger value="trend">Rating Trend</TabsTrigger>
-          <TabsTrigger value="distribution">Rating Distribution</TabsTrigger>
+          <TabsTrigger value="rating-trend">Rating Trend</TabsTrigger>
+          <TabsTrigger value="rating-distribution">Rating Distribution</TabsTrigger>
         </TabsList>
-        <TabsContent value="trend" className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={lineData}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis yAxisId="left" domain={[0, 5]} />
-              <YAxis yAxisId="right" orientation="right" domain={[0, "dataMax + 5"]} />
-              <Tooltip />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="rating"
-                stroke="#4f46e5"
-                activeDot={{ r: 8 }}
-                name="Avg. Rating"
-                strokeWidth={2}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="reviews"
-                stroke="#10b981"
-                name="Review Count"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </TabsContent>
-        <TabsContent value="distribution" className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={barData}
-              layout="vertical"
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={80} />
-              <Tooltip formatter={(value) => [`${value} reviews`, ""]} />
-              <Bar dataKey="value" name="Reviews" radius={[0, 4, 4, 0]}>
-                {barData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+
+        <TabsContent value="rating-trend">
+          <div className="h-[300px] relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg width="100%" height="100%" viewBox="0 0 800 300" preserveAspectRatio="none">
+                {/* Grid lines */}
+                <g stroke="#e5e7eb" strokeWidth="1">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <line key={`h-${i}`} x1="0" y1={i * 60} x2="800" y2={i * 60} />
+                  ))}
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <line key={`v-${i}`} x1={i * 70} y1="0" x2={i * 70} y2="300" />
+                  ))}
+                </g>
+
+                {/* Average Rating Line */}
+                <path
+                  d="M50,80 L120,70 L190,90 L260,60 L330,50 L400,50 L470,60 L540,40 L610,50 L680,40 L750,30"
+                  fill="none"
+                  stroke="#4f46e5"
+                  strokeWidth="2"
+                />
+                {Array.from({ length: 11 }).map((_, i) => (
+                  <circle
+                    key={`c1-${i}`}
+                    cx={50 + i * 70}
+                    cy={[80, 70, 90, 60, 50, 50, 60, 40, 50, 40, 30][i]}
+                    r="4"
+                    fill="#4f46e5"
+                  />
                 ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+
+                {/* Review Count Line */}
+                <path
+                  d="M50,240 L120,200 L190,220 L260,180 L330,160 L400,120 L470,140 L540,120 L610,100 L680,120 L750,80"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="2"
+                />
+                {Array.from({ length: 11 }).map((_, i) => (
+                  <circle
+                    key={`c2-${i}`}
+                    cx={50 + i * 70}
+                    cy={[240, 200, 220, 180, 160, 120, 140, 120, 100, 120, 80][i]}
+                    r="4"
+                    fill="#10b981"
+                  />
+                ))}
+
+                {/* Y-axis labels */}
+                <text x="10" y="10" fontSize="12" fill="#6b7280">
+                  5
+                </text>
+                <text x="10" y="130" fontSize="12" fill="#6b7280">
+                  2
+                </text>
+                <text x="10" y="250" fontSize="12" fill="#6b7280">
+                  0
+                </text>
+
+                <text x="780" y="10" fontSize="12" fill="#6b7280">
+                  35
+                </text>
+                <text x="780" y="130" fontSize="12" fill="#6b7280">
+                  18
+                </text>
+                <text x="780" y="250" fontSize="12" fill="#6b7280">
+                  0
+                </text>
+
+                {/* X-axis labels */}
+                {["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"].map(
+                  (month, i) => (
+                    <text key={month} x={50 + i * 70} y="290" fontSize="12" fill="#6b7280" textAnchor="middle">
+                      {month}
+                    </text>
+                  ),
+                )}
+
+                {/* Legend */}
+                <g transform="translate(350, 270)">
+                  <circle cx="0" cy="0" r="4" fill="#4f46e5" />
+                  <text x="10" y="4" fontSize="12" fill="#6b7280">
+                    Avg. Rating
+                  </text>
+                  <circle cx="100" cy="0" r="4" fill="#10b981" />
+                  <text x="110" y="4" fontSize="12" fill="#6b7280">
+                    Review Count
+                  </text>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="rating-distribution">
+          <div className="h-[300px] flex items-center justify-center">
+            <p className="text-gray-500">Rating distribution chart will appear here.</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
