@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 export function ReviewsList() {
   const reviews = [
     {
@@ -20,15 +22,20 @@ export function ReviewsList() {
         <div key={review.id} className="border-b pb-6 last:border-b-0">
           <div className="flex justify-between items-start">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
-                <img
-                  src={review.avatar || "/placeholder.svg"}
-                  alt={review.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = `https://via.placeholder.com/40x40?text=${review.name.charAt(0)}`
-                  }}
-                />
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3 relative">
+                {review.avatar ? (
+                  <Image
+                    src={review.avatar || "/placeholder.svg"}
+                    alt={review.name}
+                    width={40}
+                    height={40}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span>{review.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
               <div>
                 <div className="font-medium">{review.name}</div>

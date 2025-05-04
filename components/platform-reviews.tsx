@@ -1,3 +1,7 @@
+"use client"
+
+import Image from "next/image"
+
 export function PlatformReviews() {
   const platforms = [
     {
@@ -32,14 +36,20 @@ export function PlatformReviews() {
         <div key={platform.name} className="border-b pb-4 last:border-b-0 last:pb-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <img
-                src={platform.logo || "/placeholder.svg"}
-                alt={`${platform.name} logo`}
-                className="w-8 h-8 mr-3"
-                onError={(e) => {
-                  e.currentTarget.src = `https://via.placeholder.com/32x32?text=${platform.name.charAt(0)}`
-                }}
-              />
+              {platform.logo ? (
+                <div className="w-8 h-8 mr-3 relative">
+                  <Image
+                    src={platform.logo || "/placeholder.svg"}
+                    alt={`${platform.name} logo`}
+                    width={32}
+                    height={32}
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 mr-3 bg-gray-200 flex items-center justify-center rounded-full">
+                  <span>{platform.name.charAt(0)}</span>
+                </div>
+              )}
               {platform.name === "Trustpilot" && <span className="font-medium">Trustpilot</span>}
             </div>
             <div className="text-right">
