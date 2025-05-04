@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Menu, Mail, Server, Settings, FileCode, X, Star } from "lucide-react"
+import { Home, Menu, Mail, Server, Settings, FileCode, X, Star, Building, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -11,13 +11,15 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
-  // Updated menuItems array - removed Website Status and Website Traffic
+  // Updated menuItems array - added Security & Compliance
   const menuItems = [
     { icon: Home, label: "Dashboard", href: "/" },
     { icon: Server, label: "Server Health", href: "/server-health" },
     { icon: FileCode, label: "Technical SEO", href: "/technical-seo" },
     { icon: Mail, label: "Email Deliverability", href: "/email-deliverability" },
     { icon: Star, label: "Reputation Management", href: "/reputation-management" },
+    { icon: Building, label: "Business Presence", href: "/business-presence" },
+    { icon: Shield, label: "Security & Compliance", href: "/security-compliance" },
     { icon: FileCode, label: "Documentation", href: "/documentation/data-sources" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ]

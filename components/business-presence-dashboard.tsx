@@ -1,412 +1,344 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, ArrowUp, ArrowDown, Check, X, Info, ExternalLink } from "lucide-react"
+import { ArrowRight, ArrowUp, Check, MapPin, Edit, Trash2, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { getScoreCardColor } from "@/lib/color-utils"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-// Sample business data
-const businessData = {
-  listingAccuracy: 82,
-  listingAccuracyChange: 5,
-  activeListings: 8,
-  activeListingsChange: 1,
-  verifiedListings: 5,
-  verifiedListingsChange: 2,
-  listingIssues: 12,
-  listingIssuesChange: -3,
-  googleAccuracyScore: 64,
-
-  yourBusiness: {
-    name: "Acme Inc.",
-    address: "123 Business Ave, Suite 101",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94107",
-    phone: "(415) 555-1234",
-    website: "https://www.acmeinc.com",
-    hours: {
-      monday: "9:00 AM - 5:00 PM",
-      tuesday: "9:00 AM - 5:00 PM",
-      wednesday: "9:00 AM - 5:00 PM",
-      thursday: "9:00 AM - 5:00 PM",
-      friday: "9:00 AM - 5:00 PM",
-      saturday: "Closed",
-      sunday: "Closed",
-    },
-    categories: ["Software", "Technology", "Consulting"],
+// Mock data for business listings
+const businessListings = [
+  {
+    id: 1,
+    platform: "Google Business Profile",
+    businessName: "Acme Inc.",
+    address: "123 Main St, New York, NY 10001",
+    status: "Verified",
+    rating: 4.7,
+    reviews: 128,
+    lastUpdated: "2023-12-15",
   },
-
-  googleListing: {
-    name: "Acme Inc.",
-    address: "123 Business Avenue, Suite 101",
-    city: "San Francisco",
-    state: "CA",
-    zipCode: "94107",
-    phone: "(415) 555-1235",
-    website: "https://www.acmeinc.com",
-    hours: {
-      monday: "9:00 AM - 5:00 PM",
-      tuesday: "9:00 AM - 5:00 PM",
-      wednesday: "9:00 AM - 5:00 PM",
-      thursday: "9:00 AM - 5:00 PM",
-      friday: "9:00 AM - 5:00 PM",
-      saturday: "10:00 AM - 2:00 PM",
-      sunday: "Closed",
-    },
-    categories: ["Software Company", "Technology Consultant", "IT Services"],
+  {
+    id: 2,
+    platform: "Yelp",
+    businessName: "Acme Inc.",
+    address: "123 Main St, New York, NY 10001",
+    status: "Verified",
+    rating: 4.2,
+    reviews: 87,
+    lastUpdated: "2023-12-10",
   },
+  {
+    id: 3,
+    platform: "Facebook",
+    businessName: "Acme Inc.",
+    address: "123 Main St, New York, NY 10001",
+    status: "Pending",
+    rating: 4.5,
+    reviews: 56,
+    lastUpdated: "2023-12-05",
+  },
+  {
+    id: 4,
+    platform: "Bing Places",
+    businessName: "Acme Inc.",
+    address: "123 Main St, New York, NY 10001",
+    status: "Verified",
+    rating: 4.3,
+    reviews: 42,
+    lastUpdated: "2023-11-28",
+  },
+]
 
-  recommendations: [
-    {
-      type: "address",
-      title: "Address format mismatch:",
-      description: "Update your Business Profile to match your official address format.",
-    },
-    {
-      type: "phone",
-      title: "Phone number mismatch:",
-      description:
-        "Your phone number on your listing ((415) 555-1235) differs from your official number ((415) 555-1234).",
-    },
-    {
-      type: "hours",
-      title: "Business hours mismatch:",
-      description: "Your Saturday hours on your listing (10:00 AM - 2:00 PM) differ from your official hours (Closed).",
-    },
-    {
-      type: "category",
-      title: "Category differences:",
-      description:
-        "Your business categories on your listing don't match your official categories. Consider updating for consistency.",
-    },
-  ],
+// Function to render star ratings
+const StarRating = ({ rating }: { rating: number }) => {
+  const fullStars = Math.floor(rating)
+  const hasHalfStar = rating % 1 >= 0.5
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+
+  return (
+    <div className="flex items-center">
+      <span className="mr-1 font-medium">{rating}</span>
+      <div className="flex text-yellow-400">
+        {[...Array(fullStars)].map((_, i) => (
+          <span key={`full-${i}`}>★</span>
+        ))}
+        {hasHalfStar && <span>★</span>}
+        {[...Array(emptyStars)].map((_, i) => (
+          <span key={`empty-${i}`} className="text-gray-300">
+            ★
+          </span>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function BusinessPresenceDashboard() {
-  const [activeTab, setActiveTab] = useState("business-presence")
+  const [activeTab, setActiveTab] = useState("business-listings")
 
-  const getChangeIndicator = (change: number) => {
-    if (change > 0) {
-      return (
-        <span className="flex items-center text-kapient2-green text-xs">
-          <ArrowUp className="h-3 w-3 mr-1" />
-          {change}
-        </span>
-      )
-    } else if (change < 0) {
-      return (
-        <span className="flex items-center text-red-600 text-xs">
-          <ArrowDown className="h-3 w-3 mr-1" />
-          {Math.abs(change)}
-        </span>
-      )
-    } else {
-      return <span className="text-gray-500 text-xs">-</span>
-    }
-  }
-
-  const getFieldMatchStatus = (field1: string, field2: string) => {
-    if (field1 === field2) {
-      return <Check className="h-5 w-5 text-kapient2-green" />
-    } else {
-      return <X className="h-5 w-5 text-red-500" />
-    }
-  }
-
-  // And update the getHoursMatchStatus function similarly:
-  const getHoursMatchStatus = (day: string) => {
-    const yourHours = businessData.yourBusiness.hours[day as keyof typeof businessData.yourBusiness.hours]
-    const googleHours = businessData.googleListing.hours[day as keyof typeof businessData.googleListing.hours]
-
-    if (yourHours === googleHours) {
-      return <Check className="h-5 w-5 text-kapient2-green" />
-    } else if (
-      (yourHours === "Closed" && googleHours !== "Closed") ||
-      (yourHours !== "Closed" && googleHours === "Closed")
-    ) {
-      return <X className="h-5 w-5 text-red-500" />
-    } else {
-      return <Info className="h-5 w-5 text-kapient2-amber" />
-    }
-  }
+  // Calculate summary metrics
+  const totalListings = businessListings.length
+  const verifiedListings = businessListings.filter((listing) => listing.status === "Verified").length
+  const totalReviews = businessListings.reduce((sum, listing) => sum + listing.reviews, 0)
+  const averageRating = businessListings.reduce((sum, listing) => sum + listing.rating, 0) / businessListings.length
+  const listingAccuracy = 92 // Mock percentage
 
   return (
     <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-kapient-darkgray">Reputation Management</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-kapient-darkgray">Business Presence</h1>
           <div className="flex items-center text-xs sm:text-sm text-gray-500 mt-1">
             <span className="text-kapient-blue hover:underline cursor-pointer">Dashboard</span>
             <ArrowRight className="h-3 w-3 mx-2" />
-            <span>Reputation Management</span>
+            <span>Business Presence</span>
           </div>
         </div>
+        <Button className="bg-kapient-blue hover:bg-kapient-blue/90">
+          <Plus className="h-4 w-4 mr-2" /> Add Business Listing
+        </Button>
       </div>
 
-      <Tabs defaultValue="business-presence" className="mb-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Total Listings</div>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl md:text-3xl font-bold">{totalListings}</div>
+              <div className="text-gray-500 text-sm">{verifiedListings} verified</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Total Reviews</div>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl md:text-3xl font-bold">{totalReviews}</div>
+              <div className="flex items-center text-kapient2-green text-xs">
+                <ArrowUp className="h-3 w-3 mr-1" />
+                18 Last 30 days
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Average Rating</div>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl md:text-3xl font-bold">{averageRating.toFixed(1)}</div>
+              <div className="text-yellow-400">★★★★★</div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Across all platforms</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Listing Accuracy</div>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl md:text-3xl font-bold text-green-500">{listingAccuracy}%</div>
+            </div>
+            <div className="mt-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${listingAccuracy}%` }}></div>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">2 listings need updates</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="business-listings" className="mb-6">
         <TabsList className="mb-4">
-          <TabsTrigger value="platform-consistency" className="text-xs sm:text-sm">
-            Platform Consistency
+          <TabsTrigger value="business-listings" className="text-xs sm:text-sm">
+            Business Listings
           </TabsTrigger>
-          <TabsTrigger value="engagement-reviews" className="text-xs sm:text-sm">
-            Engagement & Reviews
+          <TabsTrigger value="reviews" className="text-xs sm:text-sm">
+            Reviews
           </TabsTrigger>
-          <TabsTrigger value="business-presence" className="text-xs sm:text-sm">
-            Business Presence
+          <TabsTrigger value="insights" className="text-xs sm:text-sm">
+            Insights
+          </TabsTrigger>
+          <TabsTrigger value="competitors" className="text-xs sm:text-sm">
+            Competitors
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="business-presence">
-          <h2 className="text-xl font-bold mb-4">Business Presence</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
-            <Card className={cn("border", getScoreCardColor(businessData.listingAccuracy))}>
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium mb-1">Listing Accuracy</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl md:text-3xl font-bold">{businessData.listingAccuracy}%</div>
-                  <div className="flex items-center text-kapient2-green text-xs">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    {businessData.listingAccuracyChange}% Last 30 days
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium mb-1">Active Listings</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl md:text-3xl font-bold">{businessData.activeListings}</div>
-                  <div className="flex items-center text-kapient2-green text-xs">
-                    <ArrowUp className="h-3 w-3 mr-1" />+{businessData.activeListingsChange} Last 30 days
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium mb-1">Verified Listings</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl md:text-3xl font-bold">{businessData.verifiedListings}</div>
-                  <div className="flex items-center text-kapient2-green text-xs">
-                    <ArrowUp className="h-3 w-3 mr-1" />+{businessData.verifiedListingsChange} Last 30 days
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-sm font-medium mb-1">Listing Issues</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-2xl md:text-3xl font-bold">{businessData.listingIssues}</div>
-                  <div className="flex items-center text-kapient2-green text-xs">
-                    <ArrowDown className="h-3 w-3 mr-1" />
-                    {Math.abs(businessData.listingIssuesChange)} Last 30 days
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="business-listings">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold mb-2">Business Listings</h2>
+            <p className="text-gray-500 text-sm">Manage your business listings across different platforms</p>
           </div>
 
-          <Card className={cn("mb-6 border", getScoreCardColor(businessData.googleAccuracyScore))}>
-            <CardHeader>
-              <CardTitle>Business Listing Accuracy</CardTitle>
-              <CardDescription>Compare your business information with your online listings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center mb-6">
-                <div className="text-center mb-2">
-                  <h3 className="text-lg font-medium">Listing Accuracy Score</h3>
-                  <div className="text-5xl font-bold mt-2">{businessData.googleAccuracyScore}%</div>
-                  <Badge className="mt-2 bg-amber-100 text-amber-800 border-amber-200">Critical Issues</Badge>
-                </div>
-                <p className="text-center text-gray-600 max-w-2xl mt-4">
-                  Your business listing accuracy affects how customers find you online. Address any discrepancies to
-                  improve your local SEO and customer experience.
-                </p>
-                <div className="flex gap-4 mt-6">
-                  <Button variant="outline" className="flex items-center">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Listing
-                  </Button>
-                  <Button className="flex items-center bg-kapient-blue hover:bg-kapient-blue/90">Update Listing</Button>
-                </div>
-              </div>
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <div className="relative w-full sm:w-auto">
+              <Input type="search" placeholder="Search listings..." className="pl-10 w-full sm:w-80" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <div className="relative w-full sm:w-auto">
+              <select className="w-full sm:w-auto appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-kapient-blue focus:border-kapient-blue">
+                <option>All Statuses</option>
+                <option>Verified</option>
+                <option>Pending</option>
+                <option>Needs Attention</option>
+              </select>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
 
-              <div className="mt-8">
-                <h3 className="text-lg font-medium mb-4">Business Information Comparison</h3>
-
-                <div className="space-y-6">
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <h4 className="font-medium">Business Name</h4>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Your Information</div>
-                          <div className="font-medium">{businessData.yourBusiness.name}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Online Listing</div>
-                          <div
-                            className={`font-medium ${businessData.yourBusiness.name === businessData.googleListing.name ? "text-kapient2-green" : "text-red-600"}`}
-                          >
-                            {businessData.googleListing.name}
-                            <span className="ml-2 inline-flex items-center">
-                              {getFieldMatchStatus(businessData.yourBusiness.name, businessData.googleListing.name)}
-                            </span>
-                          </div>
-                        </div>
+          {/* Listings Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Platform
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Business Info
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Rating
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Reviews
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Last Updated
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {businessListings.map((listing) => (
+                  <tr key={listing.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{listing.platform}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-900">{listing.businessName}</div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                        {listing.address}
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <h4 className="font-medium">Address</h4>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Your Information</div>
-                          <div className="font-medium">{businessData.yourBusiness.address}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Online Listing</div>
-                          <div
-                            className={`font-medium ${businessData.yourBusiness.address === businessData.googleListing.address ? "text-kapient2-green" : "text-red-600"}`}
-                          >
-                            {businessData.googleListing.address}
-                            <span className="ml-2 inline-flex items-center">
-                              {getFieldMatchStatus(
-                                businessData.yourBusiness.address,
-                                businessData.googleListing.address,
-                              )}
-                            </span>
-                          </div>
-                          {businessData.yourBusiness.address !== businessData.googleListing.address && (
-                            <Button size="sm" className="mt-2 bg-kapient-blue hover:bg-kapient-blue/90">
-                              Fix it
-                            </Button>
-                          )}
-                        </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge
+                        className={cn(
+                          "px-2 py-1 text-xs font-medium",
+                          listing.status === "Verified"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800",
+                        )}
+                      >
+                        {listing.status === "Verified" && <Check className="h-3 w-3 mr-1" />}
+                        {listing.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StarRating rating={listing.rating} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{listing.reviews}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{listing.lastUpdated}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-2">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Edit className="h-4 w-4 text-gray-500" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Trash2 className="h-4 w-4 text-gray-500" />
+                        </Button>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <h4 className="font-medium">City</h4>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Your Information</div>
-                          <div className="font-medium">{businessData.yourBusiness.city}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Online Listing</div>
-                          <div
-                            className={`font-medium ${businessData.yourBusiness.city === businessData.googleListing.city ? "text-kapient2-green" : "text-red-600"}`}
-                          >
-                            {businessData.googleListing.city}
-                            <span className="ml-2 inline-flex items-center">
-                              {getFieldMatchStatus(businessData.yourBusiness.city, businessData.googleListing.city)}
-                            </span>
-                          </div>
-                          {businessData.yourBusiness.city !== businessData.googleListing.city && (
-                            <Button size="sm" className="mt-2 bg-kapient-blue hover:bg-kapient-blue/90">
-                              Fix it
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <h4 className="font-medium">State</h4>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Your Information</div>
-                          <div className="font-medium">{businessData.yourBusiness.state}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Online Listing</div>
-                          <div
-                            className={`font-medium ${businessData.yourBusiness.state === businessData.googleListing.state ? "text-kapient2-green" : "text-red-600"}`}
-                          >
-                            {businessData.googleListing.state}
-                            <span className="ml-2 inline-flex items-center">
-                              {getFieldMatchStatus(businessData.yourBusiness.state, businessData.googleListing.state)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b">
-                      <h4 className="font-medium">Phone</h4>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Your Information</div>
-                          <div className="font-medium">{businessData.yourBusiness.phone}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm text-gray-500 mb-1">Online Listing</div>
-                          <div
-                            className={`font-medium ${businessData.yourBusiness.phone === businessData.googleListing.phone ? "text-kapient2-green" : "text-red-600"}`}
-                          >
-                            {businessData.googleListing.phone}
-                            <span className="ml-2 inline-flex items-center">
-                              {getFieldMatchStatus(businessData.yourBusiness.phone, businessData.googleListing.phone)}
-                            </span>
-                          </div>
-                          {businessData.yourBusiness.phone !== businessData.googleListing.phone && (
-                            <Button size="sm" className="mt-2 bg-kapient-blue hover:bg-kapient-blue/90">
-                              Fix it
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
 
-        <TabsContent value="platform-consistency">
+        <TabsContent value="reviews">
           <div className="flex items-center justify-center min-h-[300px]">
             <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">Platform Consistency</h3>
-              <p className="text-gray-500">This feature is coming soon.</p>
+              <h3 className="text-lg font-medium mb-2">Reviews</h3>
+              <p className="text-gray-500">View and manage your reviews across all platforms.</p>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="engagement-reviews">
+        <TabsContent value="insights">
           <div className="flex items-center justify-center min-h-[300px]">
             <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">Engagement & Reviews</h3>
-              <p className="text-gray-500">This feature is coming soon.</p>
+              <h3 className="text-lg font-medium mb-2">Insights</h3>
+              <p className="text-gray-500">Analyze your business presence performance.</p>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="competitors">
+          <div className="flex items-center justify-center min-h-[300px]">
+            <div className="text-center">
+              <h3 className="text-lg font-medium mb-2">Competitors</h3>
+              <p className="text-gray-500">Compare your business with competitors.</p>
             </div>
           </div>
         </TabsContent>
