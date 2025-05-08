@@ -1,13 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowRight, ExternalLink, Globe, Info, Lock, Server, Shield } from "lucide-react"
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Globe,
+  HelpCircle,
+  Info,
+  Lock,
+  Server,
+  Shield,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { getScoreColor, getSeverityBadgeColor } from "@/lib/color-utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Sample data structure based on what we can actually retrieve
 const serverHealthData = {
@@ -26,6 +40,9 @@ const serverHealthData = {
         fixUrl: "https://example.com/ssl-renewal",
         simpleExplanation:
           "Your website's security certificate is about to expire. When it does, visitors will see scary warning messages that your site is not secure.",
+        isGlobal: true,
+        learnMoreText:
+          "SSL certificates are digital certificates that authenticate the identity of a website and enable an encrypted connection. When expired, browsers will show security warnings to visitors, potentially driving them away from your site.",
       },
       {
         id: "mixed-content",
@@ -33,14 +50,21 @@ const serverHealthData = {
         description: "7 pages load insecure (HTTP) resources on secure (HTTPS) pages.",
         impact: "high",
         affectedUrls: [
-          "/blog (3 images loaded via HTTP)",
-          "/products (2 scripts loaded via HTTP)",
-          "/about (2 stylesheets loaded via HTTP)",
+          {
+            url: "/blog",
+            details: "3 images loaded via HTTP",
+            items: ["header-image.jpg", "author-profile.jpg", "featured-image.png"],
+          },
+          { url: "/products", details: "2 scripts loaded via HTTP", items: ["analytics.js", "product-slider.js"] },
+          { url: "/about", details: "2 stylesheets loaded via HTTP", items: ["custom-styles.css", "team-section.css"] },
         ],
         detectionMethod: "Lighthouse security audit",
         recommendation: "Update all resource URLs to use HTTPS instead of HTTP.",
         simpleExplanation:
           "Your secure website is loading some insecure content. This is like having a secure building but leaving a few windows unlocked - browsers will show warnings to visitors.",
+        isGlobal: false,
+        learnMoreText:
+          "Mixed content occurs when initial HTML is loaded over a secure HTTPS connection, but other resources (like images, videos, stylesheets, scripts) are loaded over an insecure HTTP connection. This poses security risks as the insecure content could be modified by attackers.",
       },
       {
         id: "weak-cipher",
@@ -51,6 +75,9 @@ const serverHealthData = {
         recommendation: "Update your server configuration to disable weak cipher suites.",
         simpleExplanation:
           "Your website is using outdated security methods. It's like using old locks that modern thieves know how to pick easily.",
+        isGlobal: true,
+        learnMoreText:
+          "Cipher suites are sets of algorithms that help secure network connections using SSL/TLS. Weak cipher suites can be vulnerable to various attacks, potentially allowing attackers to decrypt sensitive information transmitted between your server and visitors.",
       },
     ],
   },
@@ -67,6 +94,9 @@ const serverHealthData = {
         recommendation: "Consider using a faster DNS provider or optimizing your DNS configuration.",
         simpleExplanation:
           "When people type your website address, it takes too long to find your site. It's like having an address that's difficult for the postal service to locate.",
+        isGlobal: true,
+        learnMoreText:
+          "DNS (Domain Name System) resolution is the process of translating a domain name into an IP address. Slow DNS resolution increases the time it takes for users to reach your website, affecting the overall user experience and potentially impacting SEO rankings.",
       },
       {
         id: "missing-records",
@@ -78,6 +108,9 @@ const serverHealthData = {
         missingRecords: ["DMARC", "SPF"],
         simpleExplanation:
           "Your website is missing important email security settings. This makes it easier for scammers to send fake emails that appear to come from your company.",
+        isGlobal: true,
+        learnMoreText:
+          "DMARC (Domain-based Message Authentication, Reporting, and Conformance) and SPF (Sender Policy Framework) are email authentication methods designed to detect and prevent email spoofing. Without these records, your domain is more vulnerable to being impersonated in phishing attacks.",
       },
     ],
   },
@@ -90,11 +123,18 @@ const serverHealthData = {
         title: "Excessive server response time",
         description: "Your server takes too long to respond (TTFB: 1.2s), well above the recommended 600ms.",
         impact: "critical",
-        affectedUrls: ["All pages affected", "Worst: /products (1.8s)", "Worst: /blog (1.5s)"],
+        affectedUrls: [
+          { url: "/", details: "TTFB: 1.2s", items: [] },
+          { url: "/products", details: "TTFB: 1.8s", items: [] },
+          { url: "/blog", details: "TTFB: 1.5s", items: [] },
+        ],
         detectionMethod: "Lighthouse TTFB metrics",
         recommendation: "Optimize server configuration, implement caching, or upgrade hosting.",
         simpleExplanation:
           "Your website is taking too long to start loading. This is like a waiter at a restaurant who takes a long time to acknowledge you're there, before even taking your order.",
+        isGlobal: false,
+        learnMoreText:
+          "Time to First Byte (TTFB) is a measurement of how long it takes for a browser to receive the first byte of response data from the server. High TTFB values indicate server-side performance issues that can significantly impact user experience and search engine rankings.",
       },
       {
         id: "server-errors",
@@ -102,14 +142,17 @@ const serverHealthData = {
         description: "3 URLs are returning 5xx server errors, indicating server-side problems.",
         impact: "critical",
         affectedUrls: [
-          "/api/products (500 Internal Server Error)",
-          "/checkout (502 Bad Gateway)",
-          "/search (503 Service Unavailable)",
+          { url: "/api/products", details: "500 Internal Server Error", items: [] },
+          { url: "/checkout", details: "502 Bad Gateway", items: [] },
+          { url: "/search", details: "503 Service Unavailable", items: [] },
         ],
         detectionMethod: "Puppeteer HTTP status code check",
         recommendation: "Investigate server logs and fix the underlying issues causing these errors.",
         simpleExplanation:
           "Some pages on your website are completely broken. Visitors see error messages instead of your content, similar to finding 'Out of Order' signs on doors in a building.",
+        isGlobal: false,
+        learnMoreText:
+          "5xx server errors indicate problems on the server side rather than with the client's request. These errors prevent users from accessing content and can damage user experience, SEO rankings, and conversion rates if not addressed promptly.",
       },
     ],
   },
@@ -127,6 +170,9 @@ const serverHealthData = {
         recommendation: "Implement the missing security headers to improve site security.",
         simpleExplanation:
           "Your website is missing important security settings. This is like having a home without basic security features like window locks or a doorbell.",
+        isGlobal: true,
+        learnMoreText:
+          "HTTP security headers help protect websites from various attacks like XSS, clickjacking, and other code injection attacks. They instruct browsers on how to behave when handling your site's content, adding an important layer of security to your web application.",
       },
       {
         id: "outdated-software",
@@ -141,6 +187,9 @@ const serverHealthData = {
         recommendation: "Update your server software to the latest secure versions.",
         simpleExplanation:
           "Your website is running on outdated software with known security problems. It's like using a smartphone that hasn't been updated in years and is vulnerable to viruses.",
+        isGlobal: true,
+        learnMoreText:
+          "Outdated server software often contains known security vulnerabilities that have been patched in newer versions. Attackers specifically target these vulnerabilities, making it crucial to keep all server components updated to the latest stable versions.",
       },
     ],
   },
@@ -240,6 +289,8 @@ export function ServerHealthDashboard() {
   }
 
   const renderIssueCard = (issue: any, category: string, subcategory: string) => {
+    const isExpanded = expandedIssues.includes(issue.id)
+
     return (
       <div key={issue.id} className="mb-4 border rounded-lg overflow-hidden">
         <div className="p-4 flex items-start">
@@ -253,6 +304,11 @@ export function ServerHealthDashboard() {
               <Badge variant="outline" className="bg-white">
                 {category} › {subcategory}
               </Badge>
+              {issue.isGlobal && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  Site-wide Issue
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-[#7D8496] mb-2">{issue.description}</p>
 
@@ -267,19 +323,125 @@ export function ServerHealthDashboard() {
               <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90">
                 Fix Now
               </Button>
-              <Button variant="outline" size="sm">
-                Learn More
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" className="px-2">
+                      <HelpCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-md p-4">
+                    <p className="text-sm">{issue.learnMoreText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <Button variant="outline" size="sm" onClick={() => toggleIssue(issue.id)} className="flex items-center">
+                View Details{" "}
+                {isExpanded ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />}
               </Button>
-              {issue.fixUrl && (
-                <Button size="sm" variant="outline" asChild>
-                  <a href={issue.fixUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                    View Details <ExternalLink className="ml-1 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
             </div>
           </div>
         </div>
+
+        {/* Expandable details section */}
+        {isExpanded && (
+          <div className="border-t p-4 bg-gray-50">
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-1">Detection Method</h4>
+                <p className="text-sm text-gray-600">{issue.detectionMethod}</p>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-1">Recommendation</h4>
+                <p className="text-sm text-gray-600">{issue.recommendation}</p>
+              </div>
+
+              {/* For site-wide issues */}
+              {issue.isGlobal && (
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <p className="text-sm text-blue-700">
+                    <strong>Note:</strong> This is a site-wide issue affecting your entire website. Fixing this issue
+                    will resolve the problem across all pages.
+                  </p>
+                </div>
+              )}
+
+              {/* For page-specific issues with affected URLs */}
+              {!issue.isGlobal && issue.affectedUrls && issue.affectedUrls.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Affected Pages ({issue.affectedUrls.length})</h4>
+                  <div className="space-y-2">
+                    {issue.affectedUrls.map((affected: any, index: number) => (
+                      <div key={index} className="border rounded-md p-3 bg-white">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-sm">{affected.url}</p>
+                            <p className="text-sm text-gray-600">{affected.details}</p>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a
+                              href={`https://example.com${affected.url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center"
+                            >
+                              Visit <ExternalLink className="ml-1 h-3 w-3" />
+                            </a>
+                          </Button>
+                        </div>
+
+                        {/* Show specific items if available */}
+                        {affected.items && affected.items.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs font-medium text-gray-500 mb-1">Specific Items:</p>
+                            <ul className="text-xs text-gray-600 list-disc pl-4">
+                              {affected.items.map((item: string, itemIndex: number) => (
+                                <li key={itemIndex}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* For issues with missing headers */}
+              {issue.missingHeaders && (
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Missing Headers</h4>
+                  <ul className="list-disc pl-5 text-sm text-gray-600">
+                    {issue.missingHeaders.map((header: string, index: number) => (
+                      <li key={index}>{header}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* For issues with outdated components */}
+              {issue.outdatedComponents && (
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Outdated Components</h4>
+                  <div className="space-y-2">
+                    {issue.outdatedComponents.map((component: any, index: number) => (
+                      <div key={index} className="flex justify-between text-sm">
+                        <span>{component.name}</span>
+                        <span className="text-red-500">
+                          {component.currentVersion} <ArrowRight className="inline h-3 w-3" />{" "}
+                          <span className="text-green-500">{component.recommendedVersion}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
