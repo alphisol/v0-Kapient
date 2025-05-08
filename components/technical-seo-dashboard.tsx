@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, AlertTriangle, ChevronDown, Globe, Info, FileSearch, Search } from "lucide-react"
+import { AlertCircle, AlertTriangle, ChevronDown, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { SEOIssueCard } from "./seo-issue-card"
 import { Progress } from "@/components/ui/progress"
+import { getScoreColor } from "@/lib/color-utils"
 
 // Sample data structure based on what we can actually retrieve from Lighthouse and Puppeteer
 const technicalSeoData = {
@@ -270,18 +271,6 @@ export function TechnicalSeoDashboard() {
     }
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500"
-    if (score >= 60) return "text-orange-500"
-    return "text-red-500"
-  }
-
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return "bg-green-500"
-    if (score >= 60) return "bg-orange-500"
-    return "bg-red-500"
-  }
-
   // Get all critical issues across all categories
   const getAllCriticalIssues = () => {
     const issues: any[] = []
@@ -427,49 +416,26 @@ export function TechnicalSeoDashboard() {
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Technical SEO Score</CardTitle>
-            <FileSearch className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">68/100</div>
-            <Progress
-              value={68}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gradient-to-r from-blue-500 to-green-500"
-            />
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Technical SEO Score</div>
+            <div className={`text-2xl font-bold ${getScoreColor(68)}`}>68/100</div>
+            <Progress value={68} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
             <p className="text-xs text-muted-foreground">+5 from last month</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Indexed Pages</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42/45</div>
-            <Progress
-              value={42}
-              max={45}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gradient-to-r from-blue-500 to-green-500"
-            />
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Indexed Pages</div>
+            <div className={`text-2xl font-bold ${getScoreColor(93)}`}>42/45</div>
+            <Progress value={42} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
             <p className="text-xs text-muted-foreground">+3 from last month</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Crawled Pages</CardTitle>
-            <Search className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <Progress
-              value={45}
-              max={45}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gradient-to-r from-blue-500 to-green-500"
-            />
+          <CardContent className="pt-6">
+            <div className="text-sm font-medium mb-1">Crawled Pages</div>
+            <div className={`text-2xl font-bold ${getScoreColor(100)}`}>45</div>
+            <Progress value={45} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
             <p className="text-xs text-muted-foreground">No change from last month</p>
           </CardContent>
         </Card>

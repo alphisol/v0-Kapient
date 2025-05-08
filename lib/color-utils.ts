@@ -24,17 +24,12 @@ export function getScoreCardColor(score: number) {
 
 export function getSeverityColor(severity: string) {
   switch (severity) {
-    case "critical":
-      return "bg-white text-red-800 border-red-500"
     case "high":
-    case "warning":
-      return "bg-white text-yellow-800 border-yellow-500"
+      return "bg-white text-red-800 border-red-500"
     case "medium":
-    case "moderate":
-      return "bg-white text-green-500 border-green-500"
+      return "bg-white text-orange-800 border-orange-500"
     case "low":
-    case "info":
-      return "bg-white text-green-600 border-green-600"
+      return "bg-white text-yellow-800 border-yellow-500"
     default:
       return "bg-white text-gray-800 border-gray-500"
   }
@@ -42,17 +37,15 @@ export function getSeverityColor(severity: string) {
 
 export function getSeverityBadgeColor(severity: string) {
   switch (severity) {
+    case "high":
     case "critical":
       return "bg-white text-red-800 hover:bg-gray-50 border border-red-500"
-    case "high":
-    case "warning":
-      return "bg-white text-yellow-800 hover:bg-gray-50 border border-yellow-500"
     case "medium":
-    case "moderate":
-      return "bg-white text-green-500 hover:bg-gray-50 border border-green-500"
+    case "warning":
+      return "bg-white text-orange-800 hover:bg-gray-50 border border-orange-500"
     case "low":
     case "info":
-      return "bg-white text-green-600 hover:bg-gray-50 border border-green-600"
+      return "bg-white text-yellow-800 hover:bg-gray-50 border border-yellow-500"
     default:
       return "bg-white text-gray-800 hover:bg-gray-50 border border-gray-500"
   }

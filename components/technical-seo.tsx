@@ -20,6 +20,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
+import { getProgressColor, getScoreColor } from "@/lib/color-utils"
 
 // Sample technical SEO data
 const technicalSeoData = {
@@ -165,18 +166,6 @@ export function TechnicalSeo() {
     }
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500"
-    if (score >= 60) return "text-orange-500"
-    return "text-red-500"
-  }
-
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return "bg-green-500"
-    if (score >= 60) return "bg-orange-500"
-    return "bg-red-500"
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <Card className="md:col-span-1">
@@ -193,7 +182,8 @@ export function TechnicalSeo() {
               <div className="text-xs sm:text-sm text-gray-500">out of 100</div>
               <Progress
                 value={technicalSeoData.score}
-                className={`h-2 w-full mt-2 ${getProgressColor(technicalSeoData.score)}`}
+                className="h-2 w-full mt-2 bg-gray-200"
+                indicatorClassName={getProgressColor(technicalSeoData.score)}
               />
             </div>
 
@@ -281,7 +271,8 @@ export function TechnicalSeo() {
                         <span className={`text-xs ${getScoreColor(category.score)}`}>{category.score}/100</span>
                         <Progress
                           value={category.score}
-                          className={`h-1 sm:h-1.5 w-12 sm:w-16 ml-2 ${getProgressColor(category.score)}`}
+                          className="h-1 sm:h-1.5 w-12 sm:w-16 ml-2 bg-gray-200"
+                          indicatorClassName={getProgressColor(category.score)}
                         />
                       </div>
                     </div>

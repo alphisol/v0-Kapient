@@ -91,21 +91,17 @@ export function SEOAnalysisDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Overall SEO Score</div>
-            <div className="flex items-center justify-between">
-              <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(seoData.overallScore)}`}>
-                {seoData.overallScore}/100
-              </div>
+            <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(seoData.overallScore)}`}>
+              {seoData.overallScore}/100
             </div>
-            <Progress value={seoData.overallScore} className="h-2 mt-2 bg-black" />
+            <Progress value={seoData.overallScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Critical Issues</div>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl md:text-3xl font-bold text-[#EC8290]">{seoData.criticalIssues}</div>
-            </div>
+            <div className="text-2xl md:text-3xl font-bold text-[#EC8290]">{seoData.criticalIssues}</div>
             <div className="text-sm text-[#7D8496] mt-2">Require immediate attention</div>
           </CardContent>
         </Card>
@@ -113,9 +109,7 @@ export function SEOAnalysisDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Warnings</div>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl md:text-3xl font-bold text-[#F8B43B]">{seoData.warnings}</div>
-            </div>
+            <div className="text-2xl md:text-3xl font-bold text-[#F8B43B]">{seoData.warnings}</div>
             <div className="text-sm text-[#7D8496] mt-2">Should be addressed soon</div>
           </CardContent>
         </Card>
@@ -123,9 +117,7 @@ export function SEOAnalysisDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Improvements</div>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl md:text-3xl font-bold text-[#8C57D1]">{seoData.improvements}</div>
-            </div>
+            <div className="text-2xl md:text-3xl font-bold text-[#8C57D1]">{seoData.improvements}</div>
             <div className="text-sm text-[#7D8496] mt-2">Opportunities to improve</div>
           </CardContent>
         </Card>
@@ -187,7 +179,11 @@ export function SEOAnalysisDashboard() {
                         {seoData.technicalScore}/100
                       </span>
                     </div>
-                    <Progress value={seoData.technicalScore} className="h-2 bg-black" />
+                    <Progress
+                      value={seoData.technicalScore}
+                      className="h-2 bg-gray-200"
+                      indicatorClassName="bg-gray-800"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between mb-1">
@@ -196,7 +192,11 @@ export function SEOAnalysisDashboard() {
                         {seoData.keywordScore}/100
                       </span>
                     </div>
-                    <Progress value={seoData.keywordScore} className="h-2 bg-black" />
+                    <Progress
+                      value={seoData.keywordScore}
+                      className="h-2 bg-gray-200"
+                      indicatorClassName="bg-gray-800"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between mb-1">
@@ -205,7 +205,11 @@ export function SEOAnalysisDashboard() {
                         {seoData.contentScore}/100
                       </span>
                     </div>
-                    <Progress value={seoData.contentScore} className="h-2 bg-black" />
+                    <Progress
+                      value={seoData.contentScore}
+                      className="h-2 bg-gray-200"
+                      indicatorClassName="bg-gray-800"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between mb-1">
@@ -214,7 +218,11 @@ export function SEOAnalysisDashboard() {
                         {seoData.backlinkScore}/100
                       </span>
                     </div>
-                    <Progress value={seoData.backlinkScore} className="h-2 bg-black" />
+                    <Progress
+                      value={seoData.backlinkScore}
+                      className="h-2 bg-gray-200"
+                      indicatorClassName="bg-gray-800"
+                    />
                   </div>
                 </div>
               </CardContent>
