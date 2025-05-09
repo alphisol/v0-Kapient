@@ -446,7 +446,7 @@ export function ServerHealthDashboard() {
               <p className="text-sm text-[#7D8496] mb-2">{issue.description}</p>
 
               {/* Simple explanation for non-technical users */}
-              <div className="bg-white p-3 rounded-md mb-3 text-sm text-[#323048] border border-[#EAEEF7]">
+              <div className="bg-gray-50 p-3 rounded-md mb-3 text-sm text-[#323048] border border-gray-200 shadow-sm">
                 <strong>In simple terms:</strong>{" "}
                 {issue.simpleExplanation || "This issue could affect how your website performs."}
               </div>
@@ -555,26 +555,28 @@ export function ServerHealthDashboard() {
             </div>
             <p className="text-xs text-[#7D8496]">{issue.description}</p>
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="px-2 h-8 w-8 rounded-full">
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-md p-4">
-                <p className="text-sm">{issue.learnMoreText}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
         <div className="flex justify-between items-center">
-          <div className="text-xs text-[#7D8496]">
+          <div className="text-xs bg-gray-50 p-2 rounded border border-gray-200 flex-1">
             <strong>In simple terms:</strong> {issue.simpleExplanation}
           </div>
-          <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90 ml-2" onClick={() => handleFixNow(issue.id)}>
-            Fix Now
-          </Button>
+          <div className="flex items-center gap-2 ml-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" className="px-2 h-8 w-8 rounded-full">
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-md p-4">
+                  <p className="text-sm">{issue.learnMoreText}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => handleFixNow(issue.id)}>
+              Fix Now
+            </Button>
+          </div>
         </div>
       </div>
     )
