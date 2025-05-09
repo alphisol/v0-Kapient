@@ -90,7 +90,7 @@ export function DashboardSummary() {
                 <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(scores.overall)}`}>
                   {scores.overall}/100
                 </div>
-                <Progress value={scores.overall} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+                <Progress value={scores.overall} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
                 <div className="text-sm text-[#7D8496] mt-2">Needs improvement</div>
               </CardContent>
             </Card>
@@ -99,7 +99,7 @@ export function DashboardSummary() {
               <CardContent className="pt-6">
                 <div className="text-sm font-medium mb-1">SEO Score</div>
                 <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(scores.seo)}`}>{scores.seo}/100</div>
-                <Progress value={scores.seo} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+                <Progress value={scores.seo} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
                 <div className="text-sm text-[#7D8496] mt-2">
                   <Link href="/seo-factors" className="text-[#537AEF] hover:underline">
                     View SEO details
@@ -114,7 +114,7 @@ export function DashboardSummary() {
                 <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(scores.server)}`}>
                   {scores.server}/100
                 </div>
-                <Progress value={scores.server} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+                <Progress value={scores.server} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
                 <div className="text-sm text-[#7D8496] mt-2">
                   <Link href="/server-health" className="text-[#537AEF] hover:underline">
                     View server details
@@ -129,7 +129,7 @@ export function DashboardSummary() {
                 <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(scores.security)}`}>
                   {scores.security}/100
                 </div>
-                <Progress value={scores.security} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+                <Progress value={scores.security} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
                 <div className="text-sm text-[#7D8496] mt-2">Good</div>
               </CardContent>
             </Card>

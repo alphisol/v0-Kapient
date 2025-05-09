@@ -419,7 +419,7 @@ export function TechnicalSeoDashboard() {
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Technical SEO Score</div>
             <div className={`text-2xl font-bold ${getScoreColor(68)}`}>68/100</div>
-            <Progress value={68} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+            <Progress value={68} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
             <p className="text-xs text-muted-foreground">+5 from last month</p>
           </CardContent>
         </Card>
@@ -427,7 +427,7 @@ export function TechnicalSeoDashboard() {
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Indexed Pages</div>
             <div className={`text-2xl font-bold ${getScoreColor(93)}`}>42/45</div>
-            <Progress value={42} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+            <Progress value={42} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
             <p className="text-xs text-muted-foreground">+3 from last month</p>
           </CardContent>
         </Card>
@@ -435,7 +435,7 @@ export function TechnicalSeoDashboard() {
           <CardContent className="pt-6">
             <div className="text-sm font-medium mb-1">Crawled Pages</div>
             <div className={`text-2xl font-bold ${getScoreColor(100)}`}>45</div>
-            <Progress value={45} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+            <Progress value={45} max={45} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
             <p className="text-xs text-muted-foreground">No change from last month</p>
           </CardContent>
         </Card>

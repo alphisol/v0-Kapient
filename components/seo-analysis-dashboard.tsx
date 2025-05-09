@@ -94,7 +94,7 @@ export function SEOAnalysisDashboard() {
             <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(seoData.overallScore)}`}>
               {seoData.overallScore}/100
             </div>
-            <Progress value={seoData.overallScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+            <Progress value={seoData.overallScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
           </CardContent>
         </Card>
 
@@ -182,7 +182,7 @@ export function SEOAnalysisDashboard() {
                     <Progress
                       value={seoData.technicalScore}
                       className="h-2 bg-gray-200"
-                      indicatorClassName="bg-gray-800"
+                      indicatorClassName="bg-[#537AEF]"
                     />
                   </div>
                   <div>
@@ -195,7 +195,7 @@ export function SEOAnalysisDashboard() {
                     <Progress
                       value={seoData.keywordScore}
                       className="h-2 bg-gray-200"
-                      indicatorClassName="bg-gray-800"
+                      indicatorClassName="bg-[#537AEF]"
                     />
                   </div>
                   <div>
@@ -208,7 +208,7 @@ export function SEOAnalysisDashboard() {
                     <Progress
                       value={seoData.contentScore}
                       className="h-2 bg-gray-200"
-                      indicatorClassName="bg-gray-800"
+                      indicatorClassName="bg-[#537AEF]"
                     />
                   </div>
                   <div>
@@ -221,7 +221,7 @@ export function SEOAnalysisDashboard() {
                     <Progress
                       value={seoData.backlinkScore}
                       className="h-2 bg-gray-200"
-                      indicatorClassName="bg-gray-800"
+                      indicatorClassName="bg-[#537AEF]"
                     />
                   </div>
                 </div>

@@ -538,7 +538,7 @@ export function ServerHealthDashboard() {
             <Progress
               value={serverHealthData.overallScore}
               className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gray-800"
+              indicatorClassName="bg-[#537AEF]"
             />
           </CardContent>
         </Card>
@@ -554,7 +554,7 @@ export function ServerHealthDashboard() {
             <Progress
               value={serverHealthData.ssl.score}
               className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gray-800"
+              indicatorClassName="bg-[#537AEF]"
             />
           </CardContent>
         </Card>
@@ -570,7 +570,7 @@ export function ServerHealthDashboard() {
             <Progress
               value={serverHealthData.dns.score}
               className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gray-800"
+              indicatorClassName="bg-[#537AEF]"
             />
           </CardContent>
         </Card>
@@ -586,7 +586,7 @@ export function ServerHealthDashboard() {
             <Progress
               value={serverHealthData.performance.score}
               className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-gray-800"
+              indicatorClassName="bg-[#537AEF]"
             />
           </CardContent>
         </Card>
