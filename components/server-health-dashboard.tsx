@@ -232,14 +232,33 @@ const serverHealthData = {
 }
 
 export function ServerHealthDashboard() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasData, setHasData] = useState(true) // For demo purposes, set to true by default
+  // Define all sections that need loading/empty states
+  const sections = [
+    "overview",
+    "ssl",
+    "dns",
+    "server",
+    "performance",
+    "stack",
+    "criticalIssues",
+    "allIssues",
+    "sslIssues",
+    "dnsIssues",
+    "serverIssues",
+  ]
+
+  // Create state objects with all sections
+  const initialLoadingState = sections.reduce((acc, section) => ({ ...acc, [section]: false }), {})
+  const initialDataState = sections.reduce((acc, section) => ({ ...acc, [section]: true }), {})
+
+  const [loadingStates, setLoadingStates] = useState(initialLoadingState)
+  const [dataStates, setDataStates] = useState(initialDataState)
   const [activeTab, setActiveTab] = useState("overview")
   const router = useRouter()
 
   // Function to handle "Fix Now" button click
   const handleFixNow = (issueId: string) => {
-    setIsLoading(true)
+    setLoadingStates((prev) => ({ ...prev, overview: true }))
     // Simulate API call
     setTimeout(() => {
       router.push(`/server-health/fix/${issueId}`)
@@ -529,52 +548,49 @@ export function ServerHealthDashboard() {
     )
   }
 
-  // Test buttons to toggle states
-  const testLoadingState = () => {
-    setIsLoading(true)
+  // New test functions that affect all sections at once
+  const testAllLoadingStates = () => {
+    // Set all sections to loading
+    const allLoading = sections.reduce((acc, section) => ({ ...acc, [section]: true }), {})
+    setLoadingStates(allLoading)
+
     // Reset after 3 seconds
     setTimeout(() => {
-      setIsLoading(false)
+      setLoadingStates(initialLoadingState)
     }, 3000)
   }
 
-  const testEmptyState = () => {
-    setHasData(false)
+  const testAllEmptyStates = () => {
+    // Set all sections to empty (no data)
+    const allEmpty = sections.reduce((acc, section) => ({ ...acc, [section]: false }), {})
+    setDataStates(allEmpty)
+
     // Reset after 5 seconds
     setTimeout(() => {
-      setHasData(true)
+      setDataStates(initialDataState)
     }, 5000)
   }
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6 flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-12 w-12 text-[#537AEF] animate-spin mb-4" />
-        <h2 className="text-xl font-semibold text-[#323048] mb-2">Loading Server Health Data</h2>
-        <p className="text-[#7D8496]">Please wait while we analyze your server...</p>
-      </div>
-    )
-  }
+  // Add these helper functions
+  const renderCardLoading = (title: string) => (
+    <div className="flex flex-col items-center justify-center py-8">
+      <Loader2 className="h-8 w-8 text-[#537AEF] animate-spin mb-2" />
+      <p className="text-sm text-[#7D8496]">Loading {title}...</p>
+    </div>
+  )
 
-  // Empty state
-  if (!hasData) {
-    return (
-      <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6 flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="bg-gray-50 p-8 rounded-lg border text-center max-w-md">
-          <Server className="h-12 w-12 text-[#537AEF] mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-[#323048] mb-2">No Server Data Available</h2>
-          <p className="text-[#7D8496] mb-4">
-            We couldn't find any server health data for your website. This could be because your site is new or our
-            scanners haven't completed their analysis yet.
-          </p>
-          <Button className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => setHasData(true)}>
-            Run Server Scan
-          </Button>
-        </div>
-      </div>
-    )
-  }
+  const renderCardEmpty = (title: string, onRefresh: () => void) => (
+    <div className="flex flex-col items-center justify-center py-8 text-center">
+      <Server className="h-8 w-8 text-[#7D8496] mx-auto mb-2" />
+      <p className="text-sm font-medium text-[#323048] mb-1">No {title} Data Available</p>
+      <p className="text-xs text-[#7D8496] mb-3 max-w-xs">
+        We couldn't find any {title.toLowerCase()} data for your website.
+      </p>
+      <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={onRefresh}>
+        Refresh Data
+      </Button>
+    </div>
+  )
 
   return (
     <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6">
@@ -588,92 +604,131 @@ export function ServerHealthDashboard() {
           </div>
         </div>
 
-        {/* Test buttons */}
+        {/* Simplified test buttons */}
         <div className="flex gap-3">
           <Button
             variant="outline"
             className="border-[#537AEF] text-[#537AEF] hover:bg-[#537AEF]/10"
-            onClick={testLoadingState}
+            onClick={testAllLoadingStates}
           >
-            Test Loading State
+            Test All Loading States
           </Button>
           <Button
             variant="outline"
             className="border-[#537AEF] text-[#537AEF] hover:bg-[#537AEF]/10"
-            onClick={testEmptyState}
+            onClick={testAllEmptyStates}
           >
-            Test Empty State
+            Test All Empty States
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+        {/* Overall Server Health Card */}
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm font-medium mb-1">Overall Server Health</div>
-            <div className="flex items-center justify-between">
-              <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.overallScore)}`}>
-                {serverHealthData.overallScore}/100
-              </div>
-            </div>
-            <Progress
-              value={serverHealthData.overallScore}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-[#537AEF]"
-            />
+            {loadingStates.overview ? (
+              renderCardLoading("Server Health")
+            ) : !dataStates.overview ? (
+              renderCardEmpty("Server Health", () => setDataStates((prev) => ({ ...prev, overview: true })))
+            ) : (
+              <>
+                <div className="text-sm font-medium mb-1">Overall Server Health</div>
+                <div className="flex items-center justify-between">
+                  <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.overallScore)}`}>
+                    {serverHealthData.overallScore}/100
+                  </div>
+                </div>
+                <Progress
+                  value={serverHealthData.overallScore}
+                  className="h-2 mt-2 bg-gray-200"
+                  indicatorClassName="bg-[#537AEF]"
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 
+        {/* SSL/TLS Health Card */}
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm font-medium mb-1">SSL/TLS Health</div>
-            <div className="flex items-center justify-between">
-              <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.ssl.score)}`}>
-                {serverHealthData.ssl.score}/100
-              </div>
-            </div>
-            <Progress
-              value={serverHealthData.ssl.score}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-[#537AEF]"
-            />
+            {loadingStates.ssl ? (
+              renderCardLoading("SSL Health")
+            ) : !dataStates.ssl ? (
+              renderCardEmpty("SSL Health", () => setDataStates((prev) => ({ ...prev, ssl: true })))
+            ) : (
+              <>
+                <div className="text-sm font-medium mb-1">SSL/TLS Health</div>
+                <div className="flex items-center justify-between">
+                  <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.ssl.score)}`}>
+                    {serverHealthData.ssl.score}/100
+                  </div>
+                </div>
+                <Progress
+                  value={serverHealthData.ssl.score}
+                  className="h-2 mt-2 bg-gray-200"
+                  indicatorClassName="bg-[#537AEF]"
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 
+        {/* DNS Health Card */}
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm font-medium mb-1">DNS Health</div>
-            <div className="flex items-center justify-between">
-              <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.dns.score)}`}>
-                {serverHealthData.dns.score}/100
-              </div>
-            </div>
-            <Progress
-              value={serverHealthData.dns.score}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-[#537AEF]"
-            />
+            {loadingStates.dns ? (
+              renderCardLoading("DNS Health")
+            ) : !dataStates.dns ? (
+              renderCardEmpty("DNS Health", () => setDataStates((prev) => ({ ...prev, dns: true })))
+            ) : (
+              <>
+                <div className="text-sm font-medium mb-1">DNS Health</div>
+                <div className="flex items-center justify-between">
+                  <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.dns.score)}`}>
+                    {serverHealthData.dns.score}/100
+                  </div>
+                </div>
+                <Progress
+                  value={serverHealthData.dns.score}
+                  className="h-2 mt-2 bg-gray-200"
+                  indicatorClassName="bg-[#537AEF]"
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 
+        {/* Performance Card */}
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm font-medium mb-1">Performance</div>
-            <div className="flex items-center justify-between">
-              <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.performance.score)}`}>
-                {serverHealthData.performance.score}/100
-              </div>
-            </div>
-            <Progress
-              value={serverHealthData.performance.score}
-              className="h-2 mt-2 bg-gray-200"
-              indicatorClassName="bg-[#537AEF]"
-            />
+            {loadingStates.performance ? (
+              renderCardLoading("Performance")
+            ) : !dataStates.performance ? (
+              renderCardEmpty("Performance", () => setDataStates((prev) => ({ ...prev, performance: true })))
+            ) : (
+              <>
+                <div className="text-sm font-medium mb-1">Performance</div>
+                <div className="flex items-center justify-between">
+                  <div
+                    className={`text-2xl md:text-3xl font-bold ${getScoreColor(serverHealthData.performance.score)}`}
+                  >
+                    {serverHealthData.performance.score}/100
+                  </div>
+                </div>
+                <Progress
+                  value={serverHealthData.performance.score}
+                  className="h-2 mt-2 bg-gray-200"
+                  indicatorClassName="bg-[#537AEF]"
+                />
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Server Stack Card */}
         <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -683,39 +738,46 @@ export function ServerHealthDashboard() {
             <CardDescription>Technology stack detected by Wappalyzer</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Web Server</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.server}</span>
+            {loadingStates.stack ? (
+              renderCardLoading("Server Stack")
+            ) : !dataStates.stack ? (
+              renderCardEmpty("Server Stack", () => setDataStates((prev) => ({ ...prev, stack: true })))
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">Web Server</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.server}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">Operating System</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.os}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">CMS</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.cms}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">Database</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.database}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">Programming Language</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.programmingLanguage}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="font-medium">JavaScript Framework</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.jsFramework}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">CDN Provider</span>
+                  <span className="text-[#7D8496]">{serverHealthData.stack.cdnProvider}</span>
+                </div>
               </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Operating System</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.os}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">CMS</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.cms}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Database</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.database}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Programming Language</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.programmingLanguage}</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">JavaScript Framework</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.jsFramework}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium">CDN Provider</span>
-                <span className="text-[#7D8496]">{serverHealthData.stack.cdnProvider}</span>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* Critical Issues Card */}
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -727,17 +789,23 @@ export function ServerHealthDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {getTopCriticalIssues().length > 0 ? (
-                getTopCriticalIssues().map((issue) => renderCompactIssueCard(issue))
-              ) : (
-                <div className="text-center py-6">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                  <p className="text-[#323048] font-medium">No critical issues detected</p>
-                  <p className="text-[#7D8496] text-sm">Your server is running smoothly!</p>
-                </div>
-              )}
-            </div>
+            {loadingStates.criticalIssues ? (
+              renderCardLoading("Critical Issues")
+            ) : !dataStates.criticalIssues ? (
+              renderCardEmpty("Critical Issues", () => setDataStates((prev) => ({ ...prev, criticalIssues: true })))
+            ) : (
+              <div className="space-y-4">
+                {getTopCriticalIssues().length > 0 ? (
+                  getTopCriticalIssues().map((issue) => renderCompactIssueCard(issue))
+                ) : (
+                  <div className="text-center py-6">
+                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                    <p className="text-[#323048] font-medium">No critical issues detected</p>
+                    <p className="text-[#7D8496] text-sm">Your server is running smoothly!</p>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -758,6 +826,7 @@ export function ServerHealthDashboard() {
           </TabsTrigger>
         </TabsList>
 
+        {/* Overview Tab Content */}
         <TabsContent value="overview">
           <Card>
             <CardHeader>
@@ -770,19 +839,26 @@ export function ServerHealthDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium mb-3">High Impact Issues</h3>
-                {getAllHighIssues().map((issue) => renderIssueCard(issue, issue.category, issue.subcategory))}
+              {loadingStates.allIssues ? (
+                renderCardLoading("Server Issues")
+              ) : !dataStates.allIssues ? (
+                renderCardEmpty("Server Issues", () => setDataStates((prev) => ({ ...prev, allIssues: true })))
+              ) : (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-3">High Impact Issues</h3>
+                  {getAllHighIssues().map((issue) => renderIssueCard(issue, issue.category, issue.subcategory))}
 
-                <div className="mt-4">
-                  <h3 className="text-lg font-medium mb-3">Medium Impact Issues</h3>
-                  {getAllMediumIssues().map((issue) => renderIssueCard(issue, issue.category, issue.subcategory))}
+                  <div className="mt-4">
+                    <h3 className="text-lg font-medium mb-3">Medium Impact Issues</h3>
+                    {getAllMediumIssues().map((issue) => renderIssueCard(issue, issue.category, issue.subcategory))}
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* SSL/TLS Tab Content */}
         <TabsContent value="ssl">
           <Card>
             <CardHeader>
@@ -793,13 +869,20 @@ export function ServerHealthDashboard() {
               <CardDescription>Issues related to your SSL certificate and HTTPS implementation</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {serverHealthData.ssl.issues.map((issue) => renderIssueCard(issue, "SSL/TLS", "Certificate"))}
-              </div>
+              {loadingStates.sslIssues ? (
+                renderCardLoading("SSL/TLS Issues")
+              ) : !dataStates.sslIssues ? (
+                renderCardEmpty("SSL/TLS Issues", () => setDataStates((prev) => ({ ...prev, sslIssues: true })))
+              ) : (
+                <div className="space-y-4">
+                  {serverHealthData.ssl.issues.map((issue) => renderIssueCard(issue, "SSL/TLS", "Certificate"))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* DNS Tab Content */}
         <TabsContent value="dns">
           <Card>
             <CardHeader>
@@ -810,13 +893,20 @@ export function ServerHealthDashboard() {
               <CardDescription>Issues related to your domain's DNS configuration</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {serverHealthData.dns.issues.map((issue) => renderIssueCard(issue, "DNS", "Configuration"))}
-              </div>
+              {loadingStates.dnsIssues ? (
+                renderCardLoading("DNS Issues")
+              ) : !dataStates.dnsIssues ? (
+                renderCardEmpty("DNS Issues", () => setDataStates((prev) => ({ ...prev, dnsIssues: true })))
+              ) : (
+                <div className="space-y-4">
+                  {serverHealthData.dns.issues.map((issue) => renderIssueCard(issue, "DNS", "Configuration"))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Server Performance Tab Content */}
         <TabsContent value="server">
           <Card>
             <CardHeader>
@@ -827,9 +917,17 @@ export function ServerHealthDashboard() {
               <CardDescription>Issues related to your server's performance and response time</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {serverHealthData.server.issues.map((issue) => renderIssueCard(issue, "Server", "Performance"))}
-              </div>
+              {loadingStates.serverIssues ? (
+                renderCardLoading("Server Performance Issues")
+              ) : !dataStates.serverIssues ? (
+                renderCardEmpty("Server Performance Issues", () =>
+                  setDataStates((prev) => ({ ...prev, serverIssues: true })),
+                )
+              ) : (
+                <div className="space-y-4">
+                  {serverHealthData.server.issues.map((issue) => renderIssueCard(issue, "Server", "Performance"))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
