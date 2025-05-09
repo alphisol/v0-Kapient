@@ -13,6 +13,8 @@ import {
   Lock,
   Server,
   Loader2,
+  Calendar,
+  Clock,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -34,6 +36,10 @@ const serverHealthData = {
     validFrom: "2023-05-01",
     validTo: "2023-07-30",
     daysRemaining: 15,
+    domainName: "example.com",
+    issuedOn: "2023-01-15",
+    expiresOn: "2023-07-15",
+    validityPeriod: "6 months",
     issues: [
       {
         id: "ssl-expiring",
@@ -162,6 +168,26 @@ const serverHealthData = {
     ],
   },
 
+  security: {
+    issues: [
+      {
+        id: "outdated-server-software",
+        title: "Outdated server software",
+        description: "Your server is running outdated software with known vulnerabilities.",
+        impact: "high",
+        category: "Security",
+        subcategory: "Headers",
+        detectionMethod: "Server header analysis",
+        recommendation: "Update your server software to the latest version.",
+        simpleExplanation:
+          "Your website is running on outdated software with known security problems. It's like using a smartphone that hasn't been updated in years and is vulnerable to viruses.",
+        isGlobal: true,
+        learnMoreText:
+          "Running outdated server software exposes your website to known security vulnerabilities that have been patched in newer versions. Attackers actively scan for servers running vulnerable software versions to exploit these known weaknesses.",
+      },
+    ],
+  },
+
   performance: {
     score: 62,
     issues: [
@@ -241,6 +267,7 @@ export function ServerHealthDashboard() {
     "performance",
     "stack",
     "criticalIssues",
+    "sslInfo",
     "allIssues",
     "sslIssues",
     "dnsIssues",
@@ -330,6 +357,11 @@ export function ServerHealthDashboard() {
     serverHealthData.performance.issues
       .filter((issue) => issue.impact === "high")
       .forEach((issue) => issues.push({ ...issue, category: "Performance", subcategory: "Loading" }))
+
+    // Security
+    serverHealthData.security.issues
+      .filter((issue) => issue.impact === "high")
+      .forEach((issue) => issues.push({ ...issue, category: issue.category, subcategory: issue.subcategory }))
 
     return issues
   }
@@ -623,6 +655,7 @@ export function ServerHealthDashboard() {
         </div>
       </div>
 
+      {/* Score Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {/* Overall Server Health Card */}
         <Card>
@@ -727,59 +760,119 @@ export function ServerHealthDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Server Stack Card */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Server className="h-5 w-5 text-[#537AEF] mr-2" />
-              Server Stack
-            </CardTitle>
-            <CardDescription>Technology stack detected by Wappalyzer</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingStates.stack ? (
-              renderCardLoading("Server Stack")
-            ) : !dataStates.stack ? (
-              renderCardEmpty("Server Stack", () => setDataStates((prev) => ({ ...prev, stack: true })))
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Web Server</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.server}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Operating System</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.os}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">CMS</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.cms}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Database</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.database}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">Programming Language</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.programmingLanguage}</span>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="font-medium">JavaScript Framework</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.jsFramework}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">CDN Provider</span>
-                  <span className="text-[#7D8496]">{serverHealthData.stack.cdnProvider}</span>
-                </div>
+      {/* Main Content Area - Server Stack, Critical Issues, and SSL Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Left Column - Server Stack and SSL Info */}
+        <div className="space-y-6">
+          {/* Server Stack Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center">
+                <input type="checkbox" className="mr-2 h-4 w-4 text-[#537AEF]" checked readOnly />
+                <CardTitle className="text-base flex items-center">
+                  <Server className="h-5 w-5 text-[#537AEF] mr-2" />
+                  Server Stack
+                </CardTitle>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <CardDescription>Technology stack detected by Wappalyzer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingStates.stack ? (
+                renderCardLoading("Server Stack")
+              ) : !dataStates.stack ? (
+                renderCardEmpty("Server Stack", () => setDataStates((prev) => ({ ...prev, stack: true })))
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Web Server</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.server}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Operating System</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.os}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">CMS</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.cms}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Database</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.database}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Programming Language</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.programmingLanguage}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">JavaScript Framework</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.jsFramework}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">CDN Provider</span>
+                    <span className="text-[#7D8496]">{serverHealthData.stack.cdnProvider}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Critical Issues Card */}
-        <Card className="md:col-span-2">
-          <CardHeader>
+          {/* SSL Info Card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center">
+                <input type="checkbox" className="mr-2 h-4 w-4 text-[#537AEF]" checked readOnly />
+                <CardTitle className="text-base flex items-center">
+                  <Lock className="h-5 w-5 text-[#537AEF] mr-2" />
+                  SSL Info
+                </CardTitle>
+              </div>
+              <CardDescription>Certificate details detected by Wappalyzer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingStates.sslInfo ? (
+                renderCardLoading("SSL Info")
+              ) : !dataStates.sslInfo ? (
+                renderCardEmpty("SSL Info", () => setDataStates((prev) => ({ ...prev, sslInfo: true })))
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Domain Name(s)</span>
+                    <span className="text-[#7D8496]">{serverHealthData.ssl.domainName}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Issuer</span>
+                    <span className="text-[#7D8496]">{serverHealthData.ssl.issuer}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Issued On</span>
+                    <span className="text-[#7D8496] flex items-center">
+                      <Calendar className="h-3.5 w-3.5 mr-1" />
+                      {serverHealthData.ssl.issuedOn}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="font-medium">Expires On</span>
+                    <span className="text-[#7D8496] flex items-center">
+                      <Calendar className="h-3.5 w-3.5 mr-1" />
+                      {serverHealthData.ssl.expiresOn}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Validity Period</span>
+                    <span className="text-[#7D8496] flex items-center">
+                      <Clock className="h-3.5 w-3.5 mr-1" />
+                      {serverHealthData.ssl.validityPeriod}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Critical Issues */}
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
               Critical Server Issues
@@ -810,6 +903,7 @@ export function ServerHealthDashboard() {
         </Card>
       </div>
 
+      {/* Tabs Section - Keep as is */}
       <Tabs defaultValue="overview" className="mb-6" onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="overview" className="text-xs sm:text-sm">
