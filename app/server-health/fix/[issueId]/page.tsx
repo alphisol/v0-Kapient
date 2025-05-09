@@ -2,10 +2,24 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle, Loader2, XCircle } from "lucide-react"
+import {
+  ArrowLeft,
+  CheckCircle,
+  Loader2,
+  XCircle,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Printer,
+  Forward,
+  HelpCircle,
+  MonitorSmartphone,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 
 // Sample fix steps for different issue types
 const fixSteps = {
@@ -68,6 +82,139 @@ const fixSteps = {
     { id: 3, name: "Applying changes", time: 5 },
     { id: 4, name: "Verifying resolution", time: 3 },
   ],
+}
+
+// Non-technical explanations for each issue type
+const nonTechnicalExplanations = {
+  "ssl-expiring": {
+    title: "SSL Certificate Renewal Guide",
+    description:
+      "Your website's security certificate is about to expire. This is like having a store permit that needs to be renewed regularly to stay in business.",
+    steps: [
+      "We will verify that you own the domain to make sure we're securing the right website.",
+      "A new security certificate will be generated for your website.",
+      "We'll install this new certificate on your server, which is like putting a new lock on your door.",
+      "Finally, we'll check that everything is working properly so visitors see your site is secure.",
+    ],
+    additionalInfo:
+      "Keeping your SSL certificate up-to-date is crucial for security and user trust. Without a valid certificate, browsers will show warning messages to visitors, causing many to leave your site immediately.",
+  },
+
+  "mixed-content": {
+    title: "Mixed Content Repair Guide",
+    description:
+      "Your secure website is loading some insecure content. This is like having a secure building with a few windows left unlocked.",
+    steps: [
+      "We'll scan your website to find all the insecure content.",
+      "We'll identify exactly which resources (images, scripts, etc.) are being loaded insecurely.",
+      "All resource links will be updated to use secure connections (HTTPS instead of HTTP).",
+      "We'll check that everything now loads securely to ensure your site is fully protected.",
+    ],
+    additionalInfo:
+      "Mixed content issues occur when your secure (HTTPS) pages load some resources through insecure (HTTP) connections. This can trigger browser warnings and compromise security benefits of HTTPS.",
+  },
+
+  "dns-resolution": {
+    title: "DNS Performance Improvement Guide",
+    description:
+      "Your domain is taking too long to resolve. It's like having an address that's difficult for delivery services to locate.",
+    steps: [
+      "We'll examine your current DNS setup to identify performance bottlenecks.",
+      "We'll make adjustments to your DNS settings to improve speed.",
+      "The optimized settings will be applied to your domain's DNS records.",
+      "We'll verify that your domain now resolves faster for visitors.",
+    ],
+    additionalInfo:
+      "Slow DNS resolution increases the time it takes for visitors to reach your website. Faster DNS means visitors can access your site more quickly, improving user experience.",
+  },
+
+  "missing-records": {
+    title: "DNS Records Setup Guide",
+    description:
+      "Your domain is missing important email security records. This makes it easier for scammers to send fake emails that appear to come from your company.",
+    steps: [
+      "We'll analyze which specific DNS records are missing from your domain.",
+      "We'll create a properly formatted SPF record for your domain to verify email senders.",
+      "We'll generate a DMARC record to protect against email spoofing and phishing.",
+      "These records will be added to your domain's DNS settings.",
+      "We'll check that the records are working correctly across the internet.",
+    ],
+    additionalInfo:
+      "SPF and DMARC records help email providers verify if messages actually came from your domain. Without these, spammers can more easily pretend to be your organization in phishing attempts.",
+  },
+
+  "high-ttfb": {
+    title: "Server Response Optimization Guide",
+    description:
+      "Your server takes too long to begin sending data. This is like a waiter who takes a long time to acknowledge you're in the restaurant.",
+    steps: [
+      "We'll analyze what's causing your server to respond slowly.",
+      "We'll implement caching to store frequently accessed data for quicker retrieval.",
+      "We'll optimize database queries to make them more efficient.",
+      "We'll verify that your server now responds more quickly to requests.",
+    ],
+    additionalInfo:
+      "Server response time (TTFB) is the time it takes for your server to send the first byte of data. Reducing this time improves perceived page load speed and user experience.",
+  },
+
+  "server-errors": {
+    title: "Server Error Resolution Guide",
+    description:
+      "Some pages on your website are showing error messages instead of content. This is like finding 'Out of Order' signs on doors in a building.",
+    steps: [
+      "We'll examine your server logs to understand the cause of these errors.",
+      "We'll identify the specific issues causing the errors on your pages.",
+      "We'll implement the necessary fixes to resolve these problems.",
+      "We'll restart the affected services to apply the changes.",
+      "We'll check that your pages now load correctly without errors.",
+    ],
+    additionalInfo:
+      "Server errors (5xx) indicate problems on the server rather than with the visitor's browser. These errors prevent access to content and can significantly harm user experience and SEO.",
+  },
+
+  "slow-loading": {
+    title: "Page Speed Optimization Guide",
+    description:
+      "Your pages are taking too long to load. This is like a slow app that makes users wait and potentially leave.",
+    steps: [
+      "We'll analyze which elements are causing your pages to load slowly.",
+      "We'll optimize JavaScript code to improve execution speed.",
+      "We'll implement lazy loading so images and content only load when needed.",
+      "We'll set up browser caching so returning visitors experience faster loading.",
+      "We'll verify that your pages now load more quickly.",
+    ],
+    additionalInfo:
+      "Page load time directly impacts user experience and search rankings. Most users abandon sites that take more than 3 seconds to load, and Google uses page speed as a ranking factor.",
+  },
+
+  "large-images": {
+    title: "Image Optimization Guide",
+    description:
+      "Your website has images that are much larger than they need to be. It's like sending a truck to deliver a small package.",
+    steps: [
+      "We'll identify all the oversized images on your website.",
+      "We'll resize and compress these images to optimal dimensions and file sizes.",
+      "We'll convert images to modern formats like WebP that provide better compression.",
+      "We'll implement responsive images that adapt to different screen sizes.",
+      "We'll check that your pages now load faster with the optimized images.",
+    ],
+    additionalInfo:
+      "Large, unoptimized images are one of the most common causes of slow websites. Properly optimized images can reduce page load times dramatically while maintaining visual quality.",
+  },
+
+  // Default explanation for any other issue
+  default: {
+    title: "Issue Resolution Guide",
+    description: "We've detected an issue that needs to be fixed on your website.",
+    steps: [
+      "We'll analyze the specific issue affecting your website.",
+      "We'll prepare the appropriate solution based on our analysis.",
+      "We'll apply the necessary changes to resolve the issue.",
+      "We'll verify that everything is now working correctly.",
+    ],
+    additionalInfo:
+      "Regularly addressing technical issues helps maintain optimal website performance, security, and user experience.",
+  },
 }
 
 // Sample issue data
@@ -139,6 +286,7 @@ export default function FixIssuePage() {
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<"fixing" | "success" | "failed">("fixing")
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
+  const [activeTab, setActiveTab] = useState<"technical" | "non-technical">("non-technical")
 
   const steps = fixSteps[issueId as keyof typeof fixSteps] || fixSteps.default
   const issue = issueData[issueId as keyof typeof issueData] || {
@@ -148,6 +296,8 @@ export default function FixIssuePage() {
     complexity: "medium",
     estimatedTime: "10-15 minutes",
   }
+  const nonTechnical =
+    nonTechnicalExplanations[issueId as keyof typeof nonTechnicalExplanations] || nonTechnicalExplanations.default
 
   const totalSteps = steps.length
   const totalTime = steps.reduce((acc, step) => acc + step.time, 0)
@@ -217,16 +367,73 @@ export default function FixIssuePage() {
     }
   }
 
+  const getImpactIcon = (impact: string) => {
+    switch (impact) {
+      case "high":
+        return <AlertCircle className="h-5 w-5 text-red-500" />
+      case "medium":
+        return <AlertTriangle className="h-5 w-5 text-orange-500" />
+      case "low":
+        return <Info className="h-5 w-5 text-yellow-500" />
+      default:
+        return <Info className="h-5 w-5 text-gray-500" />
+    }
+  }
+
+  const handlePrintSteps = () => {
+    window.print()
+  }
+
+  const handleForwardSteps = () => {
+    // In a real app, this would open a share dialog or email form
+    alert("This would open a dialog to forward these steps via email")
+  }
+
+  const handleIgnore = () => {
+    router.push("/server-health")
+  }
+
   return (
     <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6">
-      <Button variant="outline" className="mb-6" onClick={handleBack}>
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Server Health
-      </Button>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <div className="mr-4">{getImpactIcon(issue.impact)}</div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[#323048]">Server Health Report for {issue.title}</h1>
+            <div className="flex items-center text-sm text-[#7D8496] mt-1">
+              <span>Detected on: {new Date().toLocaleString()}</span>
+              <span className="mx-2">•</span>
+              <span>ID: {issueId}</span>
+            </div>
+          </div>
+        </div>
+        <Button variant="outline" onClick={handleBack} className="flex items-center">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+        </Button>
+      </div>
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Fixing: {issue.title}</CardTitle>
-          <CardDescription>{issue.description}</CardDescription>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>{issue.title}</CardTitle>
+              <CardDescription>{issue.description}</CardDescription>
+            </div>
+            <div className="flex flex-col items-end">
+              <Badge
+                className={`mb-2 ${
+                  issue.impact === "high"
+                    ? "bg-red-100 text-red-800 border-red-200"
+                    : issue.impact === "medium"
+                      ? "bg-orange-100 text-orange-800 border-orange-200"
+                      : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                }`}
+              >
+                {issue.impact.charAt(0).toUpperCase() + issue.impact.slice(1)} Impact
+              </Badge>
+              <span className="text-sm text-gray-500">Detected {new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -250,10 +457,10 @@ export default function FixIssuePage() {
 
           <div className="mb-6">
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Progress</span>
+              <span className="text-sm font-medium">Fix Progress</span>
               <span className="text-sm font-medium">{progress}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-gray-200" indicatorClassName="bg-gray-800" />
+            <Progress value={progress} className="h-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
           </div>
 
           {status === "fixing" && (
@@ -283,7 +490,7 @@ export default function FixIssuePage() {
                     >
                       <div className="mr-3">
                         {isCurrentStep ? (
-                          <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                          <Loader2 className="h-5 w-5 text-[#537AEF] animate-spin" />
                         ) : isCompleted ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
                         ) : (
@@ -314,7 +521,9 @@ export default function FixIssuePage() {
               <p className="text-gray-600 mb-6">
                 The issue has been successfully fixed. Your server health should improve shortly.
               </p>
-              <Button onClick={handleBack}>Return to Dashboard</Button>
+              <Button onClick={handleBack} className="bg-[#537AEF] hover:bg-[#537AEF]/90">
+                Return to Dashboard
+              </Button>
             </div>
           )}
 
@@ -329,12 +538,178 @@ export default function FixIssuePage() {
                 <Button variant="outline" onClick={handleBack}>
                   Back to Dashboard
                 </Button>
-                <Button onClick={handleRetry}>Try Again</Button>
+                <Button onClick={handleRetry} className="bg-[#537AEF] hover:bg-[#537AEF]/90">
+                  Try Again
+                </Button>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
+
+      <Tabs
+        defaultValue="non-technical"
+        onValueChange={(value) => setActiveTab(value as "technical" | "non-technical")}
+      >
+        <TabsList className="mb-4">
+          <TabsTrigger value="non-technical">Non-Technical Overview</TabsTrigger>
+          <TabsTrigger value="technical">Technical Details</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="non-technical">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center mb-2">
+                <MonitorSmartphone className="h-5 w-5 text-[#537AEF] mr-2" />
+                <CardTitle>{nonTechnical.title}</CardTitle>
+              </div>
+              <CardDescription className="text-base">
+                Here's a step-by-step guide to repair the issue that occurred on your site.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="mb-6">
+                <p className="text-gray-700 mb-4">{nonTechnical.description}</p>
+
+                <h4 className="text-lg font-medium mb-3">What we'll do to fix this:</h4>
+                <div className="space-y-3 mb-6">
+                  {nonTechnical.steps.map((step, index) => (
+                    <div key={index} className="flex items-start">
+                      <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#537AEF] text-white flex items-center justify-center mr-3 mt-0.5">
+                        {index + 1}
+                      </div>
+                      <p className="text-gray-700">{step}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <h4 className="text-blue-700 font-medium mb-2 flex items-center">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Good to know
+                  </h4>
+                  <p className="text-blue-700 text-sm">{nonTechnical.additionalInfo}</p>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-2 border-t">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto flex items-center justify-center"
+                onClick={handlePrintSteps}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Print repair steps
+              </Button>
+
+              <div className="flex gap-3 w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto" onClick={handleIgnore}>
+                  Ignore
+                </Button>
+                <Button
+                  className="w-full sm:w-auto bg-[#537AEF] hover:bg-[#537AEF]/90 flex items-center justify-center"
+                  onClick={handleForwardSteps}
+                >
+                  <Forward className="h-4 w-4 mr-2" />
+                  Forward repair steps
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="technical">
+          <Card>
+            <CardHeader>
+              <CardTitle>Technical Details</CardTitle>
+              <CardDescription>
+                Detailed technical information about this issue and the automated fix process.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Issue Detection</h3>
+                  <p className="text-gray-700 mb-2">
+                    This issue was detected through automated scanning of your server health metrics. Our system
+                    identified abnormal patterns in your{" "}
+                    {issueId.includes("ssl")
+                      ? "SSL configuration"
+                      : issueId.includes("dns")
+                        ? "DNS settings"
+                        : issueId.includes("server")
+                          ? "server responses"
+                          : "performance metrics"}
+                    .
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Technical Fix Details</h3>
+                  <div className="space-y-3">
+                    {steps.map((step, index) => (
+                      <div key={step.id} className="border border-gray-200 rounded-md p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium">
+                            Step {index + 1}: {step.name}
+                          </h4>
+                          <span className="text-sm text-gray-500">Est. time: {step.time}s</span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {step.name.includes("Analyzing")
+                            ? "Running diagnostics on affected components and collecting system data."
+                            : step.name.includes("Generating")
+                              ? "Creating new configuration based on best practices and security standards."
+                              : step.name.includes("Optimizing")
+                                ? "Adjusting parameters for improved performance based on system analysis."
+                                : step.name.includes("Verifying")
+                                  ? "Running tests to ensure changes have been successfully applied."
+                                  : step.name.includes("Installing")
+                                    ? "Deploying new components and configurations to the server."
+                                    : step.name.includes("Updating")
+                                      ? "Modifying existing settings to resolve the detected issues."
+                                      : step.name.includes("Configuring")
+                                        ? "Setting up new parameters to optimize system behavior."
+                                        : step.name.includes("Scanning")
+                                          ? "Inspecting system for all instances of the issue."
+                                          : step.name.includes("Identifying")
+                                            ? "Locating specific problematic elements in your configuration."
+                                            : step.name.includes("Implementing")
+                                              ? "Adding new functionality to address the root cause."
+                                              : "Applying automated fixes based on issue analysis."}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-2">System Impact</h3>
+                  <p className="text-gray-700">
+                    This fix{" "}
+                    {status === "fixing"
+                      ? "will adjust"
+                      : status === "success"
+                        ? "has adjusted"
+                        : "would have adjusted"}{" "}
+                    configuration files and settings related to your
+                    {issueId.includes("ssl")
+                      ? " SSL certificate and security settings"
+                      : issueId.includes("dns")
+                        ? " DNS configuration and network settings"
+                        : issueId.includes("server")
+                          ? " server infrastructure and response handling"
+                          : issueId.includes("image")
+                            ? " content delivery and image processing"
+                            : " system performance and optimization parameters"}
+                    . No data will be lost during this process.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
