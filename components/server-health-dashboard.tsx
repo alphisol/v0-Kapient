@@ -274,6 +274,20 @@ export function ServerHealthDashboard() {
     }
   }
 
+  // Get border color based on impact
+  const getImpactBorderColor = (impact: string) => {
+    switch (impact) {
+      case "high":
+        return "border-l-red-500"
+      case "medium":
+        return "border-l-orange-500"
+      case "low":
+        return "border-l-yellow-500"
+      default:
+        return "border-l-gray-500"
+    }
+  }
+
   // Get all critical issues across all categories
   const getAllHighIssues = () => {
     const issues: any[] = []
@@ -336,7 +350,7 @@ export function ServerHealthDashboard() {
 
   const renderIssueCard = (issue: any, category: string, subcategory: string) => {
     return (
-      <Card key={issue.id} className="mb-4 border-l-4 border-l-red-500">
+      <Card key={issue.id} className={`mb-4 border-l-4 ${getImpactBorderColor(issue.impact)}`}>
         <CardContent className="p-4">
           <div className="flex items-start">
             <div className="mr-3 mt-0.5 flex-shrink-0">{getImpactIcon(issue.impact)}</div>
