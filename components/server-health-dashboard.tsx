@@ -6,8 +6,6 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
   ExternalLink,
   Globe,
   HelpCircle,
@@ -249,15 +247,6 @@ export function ServerHealthDashboard() {
     }, 1000)
   }
 
-  // Toggle issue expansion
-  const toggleIssue = (issueId: string) => {
-    if (expandedIssues.includes(issueId)) {
-      setExpandedIssues(expandedIssues.filter((id) => id !== issueId))
-    } else {
-      setExpandedIssues([...expandedIssues, issueId])
-    }
-  }
-
   // Update the getImpactIcon function to use the new color scheme
   const getImpactIcon = (impact: string) => {
     switch (impact) {
@@ -341,8 +330,6 @@ export function ServerHealthDashboard() {
   }
 
   const renderIssueCard = (issue: any, category: string, subcategory: string) => {
-    const isExpanded = expandedIssues.includes(issue.id)
-
     return (
       <Card key={issue.id} className="mb-4 border-l-4 border-l-red-500">
         <CardContent className="p-4">
@@ -364,9 +351,27 @@ export function ServerHealthDashboard() {
                     </Badge>
                   )}
                 </div>
-                <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => handleFixNow(issue.id)}>
-                  Fix Now
-                </Button>
+                <div className="flex items-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" className="px-2 h-8 w-8 rounded-full">
+                          <HelpCircle className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-md p-4">
+                        <p className="text-sm">{issue.learnMoreText}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Button
+                    size="sm"
+                    className="bg-[#537AEF] hover:bg-[#537AEF]/90"
+                    onClick={() => handleFixNow(issue.id)}
+                  >
+                    Fix Now
+                  </Button>
+                </div>
               </div>
               <p className="text-sm text-[#7D8496] mb-2">{issue.description}</p>
 
@@ -376,106 +381,83 @@ export function ServerHealthDashboard() {
                 {issue.simpleExplanation || "This issue could affect how your website performs."}
               </div>
 
-              {/* Action buttons */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="sm" className="px-2">
-                        <HelpCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-md p-4">
-                      <p className="text-sm">{issue.learnMoreText}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <Button variant="outline" size="sm" onClick={() => toggleIssue(issue.id)} className="flex items-center">
-                  View Details{" "}
-                  {isExpanded ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />}
-                </Button>
-              </div>
-
-              {/* Expandable details section */}
-              {isExpanded && (
-                <div className="border-t p-4 mt-4 bg-gray-50 rounded-md">
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-1">Detection Method</h4>
-                      <p className="text-sm text-gray-600">{issue.detectionMethod}</p>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-medium mb-1">Recommendation</h4>
-                      <p className="text-sm text-gray-600">{issue.recommendation}</p>
-                    </div>
-
-                    {/* For site-wide issues */}
-                    {issue.isGlobal && (
-                      <div className="bg-blue-50 p-3 rounded-md">
-                        <p className="text-sm text-blue-700">
-                          <strong>Note:</strong> This is a site-wide issue affecting your entire website. Fixing this
-                          issue will resolve the problem across all pages.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* For page-specific issues with affected URLs */}
-                    {!issue.isGlobal && issue.affectedUrls && issue.affectedUrls.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Affected Pages ({issue.affectedUrls.length})</h4>
-                        <div className="space-y-2">
-                          {issue.affectedUrls.map((affected: any, index: number) => (
-                            <div key={index} className="border rounded-md p-3 bg-white">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-sm">{affected.url}</p>
-                                  <p className="text-sm text-gray-600">{affected.details}</p>
-                                </div>
-                                <Button variant="outline" size="sm" asChild>
-                                  <a
-                                    href={`https://example.com${affected.url}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center"
-                                  >
-                                    Visit <ExternalLink className="ml-1 h-3 w-3" />
-                                  </a>
-                                </Button>
-                              </div>
-
-                              {/* Show specific items if available */}
-                              {affected.items && affected.items.length > 0 && (
-                                <div className="mt-2">
-                                  <p className="text-xs font-medium text-gray-500 mb-1">Specific Items:</p>
-                                  <ul className="text-xs text-gray-600 list-disc pl-4">
-                                    {affected.items.map((item: string, itemIndex: number) => (
-                                      <li key={itemIndex}>{item}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* For issues with missing headers */}
-                    {issue.missingRecords && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-1">Missing Records</h4>
-                        <ul className="list-disc pl-5 text-sm text-gray-600">
-                          {issue.missingRecords.map((record: string, index: number) => (
-                            <li key={index}>{record}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+              {/* Expanded details section - always visible now */}
+              <div className="border-t p-4 mt-4 bg-gray-50 rounded-md">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">Detection Method</h4>
+                    <p className="text-sm text-gray-600">{issue.detectionMethod}</p>
                   </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">Recommendation</h4>
+                    <p className="text-sm text-gray-600">{issue.recommendation}</p>
+                  </div>
+
+                  {/* For site-wide issues */}
+                  {issue.isGlobal && (
+                    <div className="bg-blue-50 p-3 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        <strong>Note:</strong> This is a site-wide issue affecting your entire website. Fixing this
+                        issue will resolve the problem across all pages.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* For page-specific issues with affected URLs */}
+                  {!issue.isGlobal && issue.affectedUrls && issue.affectedUrls.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Affected Pages ({issue.affectedUrls.length})</h4>
+                      <div className="space-y-2">
+                        {issue.affectedUrls.map((affected: any, index: number) => (
+                          <div key={index} className="border rounded-md p-3 bg-white">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-sm">{affected.url}</p>
+                                <p className="text-sm text-gray-600">{affected.details}</p>
+                              </div>
+                              <Button variant="outline" size="sm" asChild>
+                                <a
+                                  href={`https://example.com${affected.url}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center"
+                                >
+                                  Visit <ExternalLink className="ml-1 h-3 w-3" />
+                                </a>
+                              </Button>
+                            </div>
+
+                            {/* Show specific items if available */}
+                            {affected.items && affected.items.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs font-medium text-gray-500 mb-1">Specific Items:</p>
+                                <ul className="text-xs text-gray-600 list-disc pl-4">
+                                  {affected.items.map((item: string, itemIndex: number) => (
+                                    <li key={itemIndex}>{item}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* For issues with missing headers */}
+                  {issue.missingRecords && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Missing Records</h4>
+                      <ul className="list-disc pl-5 text-sm text-gray-600">
+                        {issue.missingRecords.map((record: string, index: number) => (
+                          <li key={index}>{record}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </CardContent>
