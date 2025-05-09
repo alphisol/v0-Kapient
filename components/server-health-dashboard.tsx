@@ -756,9 +756,6 @@ export function ServerHealthDashboard() {
           <TabsTrigger value="server" className="text-xs sm:text-sm">
             Server Performance
           </TabsTrigger>
-          <TabsTrigger value="performance" className="text-xs sm:text-sm">
-            Performance
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -832,23 +829,6 @@ export function ServerHealthDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {serverHealthData.server.issues.map((issue) => renderIssueCard(issue, "Server", "Performance"))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Server className="h-5 w-5 text-[#537AEF] mr-2" />
-                Performance Issues
-              </CardTitle>
-              <CardDescription>Issues related to your website's loading speed and performance</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {serverHealthData.performance.issues.map((issue) => renderIssueCard(issue, "Performance", "Loading"))}
               </div>
             </CardContent>
           </Card>
