@@ -232,10 +232,9 @@ const serverHealthData = {
 }
 
 export function ServerHealthDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
   const [isLoading, setIsLoading] = useState(false)
   const [hasData, setHasData] = useState(true) // For demo purposes, set to true by default
-  const [expandedIssues, setExpandedIssues] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState("overview")
   const router = useRouter()
 
   // Function to handle "Fix Now" button click
@@ -465,6 +464,23 @@ export function ServerHealthDashboard() {
     )
   }
 
+  // Test buttons to toggle states
+  const testLoadingState = () => {
+    setIsLoading(true)
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 3000)
+  }
+
+  const testEmptyState = () => {
+    setHasData(false)
+    // Reset after 5 seconds
+    setTimeout(() => {
+      setHasData(true)
+    }, 5000)
+  }
+
   // Loading state
   if (isLoading) {
     return (
@@ -487,7 +503,7 @@ export function ServerHealthDashboard() {
             We couldn't find any server health data for your website. This could be because your site is new or our
             scanners haven't completed their analysis yet.
           </p>
-          <Button className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => setIsLoading(true)}>
+          <Button className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => setHasData(true)}>
             Run Server Scan
           </Button>
         </div>
@@ -505,6 +521,24 @@ export function ServerHealthDashboard() {
             <ArrowRight className="h-3 w-3 mx-2" />
             <span className="text-[#537AEF]">Server Health</span>
           </div>
+        </div>
+
+        {/* Test buttons */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="border-[#537AEF] text-[#537AEF] hover:bg-[#537AEF]/10"
+            onClick={testLoadingState}
+          >
+            Test Loading State
+          </Button>
+          <Button
+            variant="outline"
+            className="border-[#537AEF] text-[#537AEF] hover:bg-[#537AEF]/10"
+            onClick={testEmptyState}
+          >
+            Test Empty State
+          </Button>
         </div>
       </div>
 
