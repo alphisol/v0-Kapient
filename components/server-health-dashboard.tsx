@@ -328,6 +328,12 @@ export function ServerHealthDashboard() {
     return issues
   }
 
+  // Get top 4 critical issues for the dashboard
+  const getTopCriticalIssues = () => {
+    const highIssues = getAllHighIssues()
+    return highIssues.slice(0, 4) // Get only the first 4 high impact issues
+  }
+
   const renderIssueCard = (issue: any, category: string, subcategory: string) => {
     return (
       <Card key={issue.id} className="mb-4 border-l-4 border-l-red-500">
@@ -461,6 +467,51 @@ export function ServerHealthDashboard() {
           </div>
         </CardContent>
       </Card>
+    )
+  }
+
+  // Render a compact critical issue for the dashboard
+  const renderCompactIssueCard = (issue: any) => {
+    return (
+      <div key={issue.id} className="border-b pb-3 last:border-b-0 last:pb-0">
+        <div className="flex items-start gap-2 mb-2">
+          {getImpactIcon(issue.impact)}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-medium text-sm">{issue.title}</span>
+              <Badge className={getImpactBadgeColor(issue.impact)} variant="outline">
+                {issue.category}
+              </Badge>
+              {issue.isGlobal && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+                  Site-wide
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-[#7D8496]">{issue.description}</p>
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="px-2 h-8 w-8 rounded-full">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-md p-4">
+                <p className="text-sm">{issue.learnMoreText}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-[#7D8496]">
+            <strong>In simple terms:</strong> {issue.simpleExplanation}
+          </div>
+          <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90 ml-2" onClick={() => handleFixNow(issue.id)}>
+            Fix Now
+          </Button>
+        </div>
+      </div>
     )
   }
 
@@ -654,49 +705,24 @@ export function ServerHealthDashboard() {
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Lock className="h-5 w-5 text-[#537AEF] mr-2" />
-              SSL Certificate Information
+              <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              Critical Server Issues
             </CardTitle>
-            <CardDescription>Details about your SSL certificate status and configuration</CardDescription>
+            <CardDescription>
+              These issues have the highest impact on your server's health and should be addressed immediately
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-3">
-                <span className="font-medium">Status</span>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-1.5" />
-                  <span className="text-green-700">{serverHealthData.ssl.status}</span>
+              {getTopCriticalIssues().length > 0 ? (
+                getTopCriticalIssues().map((issue) => renderCompactIssueCard(issue))
+              ) : (
+                <div className="text-center py-6">
+                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                  <p className="text-[#323048] font-medium">No critical issues detected</p>
+                  <p className="text-[#7D8496] text-sm">Your server is running smoothly!</p>
                 </div>
-              </div>
-
-              <div className="flex justify-between border-b pb-3">
-                <span className="font-medium">Issuer</span>
-                <span className="text-[#7D8496]">{serverHealthData.ssl.issuer}</span>
-              </div>
-
-              <div className="flex justify-between border-b pb-3">
-                <span className="font-medium">Valid From</span>
-                <span className="text-[#7D8496]">{serverHealthData.ssl.validFrom}</span>
-              </div>
-
-              <div className="flex justify-between border-b pb-3">
-                <span className="font-medium">Valid To</span>
-                <span className="text-[#7D8496]">{serverHealthData.ssl.validTo}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium">Days Remaining</span>
-                <div
-                  className={`flex items-center ${serverHealthData.ssl.daysRemaining < 30 ? "text-red-500" : "text-green-500"}`}
-                >
-                  {serverHealthData.ssl.daysRemaining < 30 ? (
-                    <AlertCircle className="h-4 w-4 mr-1.5" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4 mr-1.5" />
-                  )}
-                  <span>{serverHealthData.ssl.daysRemaining} days</span>
-                </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
