@@ -1,12 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
-  CheckCircle,
-  Loader2,
-  XCircle,
   AlertCircle,
   AlertTriangle,
   Info,
@@ -17,70 +14,69 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 
 // Sample fix steps for different issue types
 const fixSteps = {
   "ssl-expiring": [
-    { id: 1, name: "Validating domain ownership", time: 2 },
-    { id: 2, name: "Generating new certificate", time: 5 },
-    { id: 3, name: "Installing certificate", time: 3 },
-    { id: 4, name: "Verifying installation", time: 2 },
+    { id: 1, name: "Validating domain ownership", time: 15 },
+    { id: 2, name: "Generating new certificate", time: 20 },
+    { id: 3, name: "Installing certificate", time: 10 },
+    { id: 4, name: "Verifying installation", time: 5 },
   ],
   "mixed-content": [
-    { id: 1, name: "Scanning for mixed content", time: 3 },
-    { id: 2, name: "Identifying HTTP resources", time: 2 },
-    { id: 3, name: "Updating resource URLs to HTTPS", time: 4 },
-    { id: 4, name: "Verifying changes", time: 2 },
+    { id: 1, name: "Scanning for mixed content", time: 10 },
+    { id: 2, name: "Identifying HTTP resources", time: 15 },
+    { id: 3, name: "Updating resource URLs to HTTPS", time: 20 },
+    { id: 4, name: "Verifying changes", time: 10 },
   ],
   "dns-resolution": [
-    { id: 1, name: "Analyzing DNS configuration", time: 2 },
-    { id: 2, name: "Optimizing DNS settings", time: 3 },
-    { id: 3, name: "Updating DNS records", time: 4 },
-    { id: 4, name: "Verifying DNS propagation", time: 5 },
+    { id: 1, name: "Analyzing DNS configuration", time: 10 },
+    { id: 2, name: "Optimizing DNS settings", time: 15 },
+    { id: 3, name: "Updating DNS records", time: 20 },
+    { id: 4, name: "Verifying DNS propagation", time: 180 }, // DNS propagation can take hours; using 3 hours here
   ],
   "missing-records": [
-    { id: 1, name: "Analyzing missing DNS records", time: 2 },
-    { id: 2, name: "Generating SPF record", time: 3 },
-    { id: 3, name: "Generating DMARC record", time: 3 },
-    { id: 4, name: "Adding records to DNS", time: 4 },
-    { id: 5, name: "Verifying record propagation", time: 5 },
+    { id: 1, name: "Analyzing missing DNS records", time: 10 },
+    { id: 2, name: "Generating SPF record", time: 15 },
+    { id: 3, name: "Generating DMARC record", time: 15 },
+    { id: 4, name: "Adding records to DNS", time: 20 },
+    { id: 5, name: "Verifying record propagation", time: 180 }, // DNS propagation can take hours
   ],
   "high-ttfb": [
-    { id: 1, name: "Analyzing server response time", time: 2 },
-    { id: 2, name: "Configuring server caching", time: 4 },
-    { id: 3, name: "Optimizing database queries", time: 5 },
-    { id: 4, name: "Verifying improvements", time: 3 },
+    { id: 1, name: "Analyzing server response time", time: 15 },
+    { id: 2, name: "Configuring server caching", time: 25 },
+    { id: 3, name: "Optimizing database queries", time: 45 },
+    { id: 4, name: "Verifying improvements", time: 20 },
   ],
   "server-errors": [
-    { id: 1, name: "Analyzing server logs", time: 3 },
-    { id: 2, name: "Identifying error sources", time: 4 },
-    { id: 3, name: "Applying fixes", time: 5 },
-    { id: 4, name: "Restarting affected services", time: 2 },
-    { id: 5, name: "Verifying resolution", time: 3 },
+    { id: 1, name: "Analyzing server logs", time: 30 },
+    { id: 2, name: "Identifying error sources", time: 45 },
+    { id: 3, name: "Applying fixes", time: 60 },
+    { id: 4, name: "Restarting affected services", time: 15 },
+    { id: 5, name: "Verifying resolution", time: 30 },
   ],
   "slow-loading": [
-    { id: 1, name: "Analyzing page load times", time: 2 },
-    { id: 2, name: "Optimizing JavaScript", time: 4 },
-    { id: 3, name: "Implementing lazy loading", time: 3 },
-    { id: 4, name: "Configuring browser caching", time: 3 },
-    { id: 5, name: "Verifying improvements", time: 2 },
+    { id: 1, name: "Analyzing page load times", time: 20 },
+    { id: 2, name: "Optimizing JavaScript", time: 45 },
+    { id: 3, name: "Implementing lazy loading", time: 30 },
+    { id: 4, name: "Configuring browser caching", time: 20 },
+    { id: 5, name: "Verifying improvements", time: 15 },
   ],
   "large-images": [
-    { id: 1, name: "Scanning for large images", time: 2 },
-    { id: 2, name: "Optimizing image sizes", time: 5 },
-    { id: 3, name: "Converting to WebP format", time: 3 },
-    { id: 4, name: "Implementing responsive images", time: 3 },
-    { id: 5, name: "Verifying improvements", time: 2 },
+    { id: 1, name: "Scanning for large images", time: 15 },
+    { id: 2, name: "Optimizing image sizes", time: 30 },
+    { id: 3, name: "Converting to WebP format", time: 20 },
+    { id: 4, name: "Implementing responsive images", time: 20 },
+    { id: 5, name: "Verifying improvements", time: 15 },
   ],
   // Default steps for any other issue
   default: [
-    { id: 1, name: "Analyzing issue", time: 3 },
-    { id: 2, name: "Preparing fix", time: 4 },
-    { id: 3, name: "Applying changes", time: 5 },
-    { id: 4, name: "Verifying resolution", time: 3 },
+    { id: 1, name: "Analyzing issue", time: 20 },
+    { id: 2, name: "Preparing fix", time: 30 },
+    { id: 3, name: "Applying changes", time: 45 },
+    { id: 4, name: "Verifying resolution", time: 20 },
   ],
 }
 
@@ -282,11 +278,10 @@ export default function FixIssuePage() {
   const router = useRouter()
   const issueId = params.issueId as string
 
+  const [activeTab, setActiveTab] = useState<"technical" | "non-technical">("non-technical")
   const [currentStep, setCurrentStep] = useState(1)
   const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState<"fixing" | "success" | "failed">("fixing")
-  const [timeRemaining, setTimeRemaining] = useState<number>(0)
-  const [activeTab, setActiveTab] = useState<"technical" | "non-technical">("non-technical")
+  const [status, setStatus] = useState("fixing")
 
   const steps = fixSteps[issueId as keyof typeof fixSteps] || fixSteps.default
   const issue = issueData[issueId as keyof typeof issueData] || {
@@ -298,38 +293,6 @@ export default function FixIssuePage() {
   }
   const nonTechnical =
     nonTechnicalExplanations[issueId as keyof typeof nonTechnicalExplanations] || nonTechnicalExplanations.default
-
-  const totalSteps = steps.length
-  const totalTime = steps.reduce((acc, step) => acc + step.time, 0)
-
-  useEffect(() => {
-    // Simulate the fix process
-    if (status === "fixing" && currentStep <= totalSteps) {
-      const currentStepTime = steps[currentStep - 1].time * 1000
-      const timer = setTimeout(() => {
-        // Random chance of failure (10%)
-        if (Math.random() < 0.1 && currentStep === totalSteps) {
-          setStatus("failed")
-          return
-        }
-
-        if (currentStep < totalSteps) {
-          setCurrentStep(currentStep + 1)
-          setProgress(Math.round((currentStep / totalSteps) * 100))
-        } else {
-          setProgress(100)
-          setStatus("success")
-        }
-      }, currentStepTime)
-
-      // Update time remaining
-      const remainingSteps = steps.slice(currentStep - 1)
-      const remainingTime = remainingSteps.reduce((acc, step) => acc + step.time, 0)
-      setTimeRemaining(remainingTime)
-
-      return () => clearTimeout(timer)
-    }
-  }, [currentStep, status, steps, totalSteps])
 
   const handleRetry = () => {
     setCurrentStep(1)
@@ -386,7 +349,7 @@ export default function FixIssuePage() {
 
   const handleForwardSteps = () => {
     // In a real app, this would open a share dialog or email form
-    alert("This would open a dialog to forward these steps via email")
+    alert("This would open a dialog to forward these recommendations to your IT team or support staff")
   }
 
   const handleIgnore = () => {
@@ -455,95 +418,63 @@ export default function FixIssuePage() {
             </div>
           </div>
 
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Fix Progress</span>
-              <span className="text-sm font-medium">{progress}%</span>
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
+            <div className="flex">
+              <AlertTriangle className="h-5 w-5 text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-amber-800 mb-1">Suggested Fix Plan</h3>
+                <p className="text-amber-700 text-sm">
+                  This is a preview of the recommended fix process. Actual implementation would require manual action or
+                  scheduling through your server administrator.
+                </p>
+              </div>
             </div>
-            <Progress value={progress} className="h-2 bg-gray-200" indicatorClassName="bg-[#537AEF]" />
           </div>
 
-          {status === "fixing" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Estimated time remaining: {timeRemaining} seconds</span>
-                <span>
-                  Step {currentStep} of {totalSteps}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {steps.map((step, index) => {
-                  const isCurrentStep = index + 1 === currentStep
-                  const isCompleted = index + 1 < currentStep
-
-                  return (
-                    <div
-                      key={step.id}
-                      className={`flex items-center p-3 rounded-md ${
-                        isCurrentStep
-                          ? "bg-blue-50 border border-blue-200"
-                          : isCompleted
-                            ? "bg-green-50 border border-green-200"
-                            : "bg-gray-50 border border-gray-200"
-                      }`}
-                    >
-                      <div className="mr-3">
-                        {isCurrentStep ? (
-                          <Loader2 className="h-5 w-5 text-[#537AEF] animate-spin" />
-                        ) : isCompleted ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <div className="h-5 w-5 rounded-full border-2 border-gray-300" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{step.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {isCompleted
-                            ? "Completed"
-                            : isCurrentStep
-                              ? "In progress..."
-                              : `Estimated time: ${step.time} seconds`}
-                        </div>
-                      </div>
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Recommended Fix Steps</h3>
+            <div className="space-y-3">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex items-center p-3 rounded-md bg-gray-50 border border-gray-200">
+                  <div className="mr-3">
+                    <div className="h-5 w-5 rounded-full bg-[#537AEF] text-white flex items-center justify-center text-xs font-medium">
+                      {index + 1}
                     </div>
-                  )
-                })}
-              </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{step.name}</div>
+                    <div className="text-xs text-gray-500">
+                      Estimated time: {step.time} {step.time === 1 ? "minute" : "minutes"}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
 
-          {status === "success" && (
-            <div className="text-center py-6">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-green-700 mb-2">Fix Successfully Applied!</h3>
-              <p className="text-gray-600 mb-6">
-                The issue has been successfully fixed. Your server health should improve shortly.
-              </p>
-              <Button onClick={handleBack} className="bg-[#537AEF] hover:bg-[#537AEF]/90">
-                Return to Dashboard
+            <div className="mt-6 flex flex-col sm:flex-row sm:justify-between gap-3 pt-2 border-t">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto flex items-center justify-center"
+                onClick={handlePrintSteps}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Print steps
               </Button>
-            </div>
-          )}
 
-          {status === "failed" && (
-            <div className="text-center py-6">
-              <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-red-700 mb-2">Fix Failed</h3>
-              <p className="text-gray-600 mb-6">
-                We encountered an error while trying to fix this issue. Please try again or contact support.
-              </p>
-              <div className="flex justify-center gap-4">
-                <Button variant="outline" onClick={handleBack}>
-                  Back to Dashboard
+              <div className="flex gap-3 w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto" onClick={handleIgnore}>
+                  Dismiss
                 </Button>
-                <Button onClick={handleRetry} className="bg-[#537AEF] hover:bg-[#537AEF]/90">
-                  Try Again
+                <Button
+                  className="w-full sm:w-auto bg-[#537AEF] hover:bg-[#537AEF]/90 flex items-center justify-center"
+                  onClick={handleForwardSteps}
+                >
+                  <Forward className="h-4 w-4 mr-2" />
+                  Forward to IT team
                 </Button>
               </div>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
@@ -564,14 +495,14 @@ export default function FixIssuePage() {
                 <CardTitle>{nonTechnical.title}</CardTitle>
               </div>
               <CardDescription className="text-base">
-                Here's a step-by-step guide to repair the issue that occurred on your site.
+                Here's a step-by-step guide to understand this issue on your site.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="mb-6">
                 <p className="text-gray-700 mb-4">{nonTechnical.description}</p>
 
-                <h4 className="text-lg font-medium mb-3">What we'll do to fix this:</h4>
+                <h4 className="text-lg font-medium mb-3">What needs to be done to fix this:</h4>
                 <div className="space-y-3 mb-6">
                   {nonTechnical.steps.map((step, index) => (
                     <div key={index} className="flex items-start">
@@ -599,19 +530,19 @@ export default function FixIssuePage() {
                 onClick={handlePrintSteps}
               >
                 <Printer className="h-4 w-4 mr-2" />
-                Print repair steps
+                Print explanation
               </Button>
 
               <div className="flex gap-3 w-full sm:w-auto">
                 <Button variant="outline" className="w-full sm:w-auto" onClick={handleIgnore}>
-                  Ignore
+                  Dismiss
                 </Button>
                 <Button
                   className="w-full sm:w-auto bg-[#537AEF] hover:bg-[#537AEF]/90 flex items-center justify-center"
                   onClick={handleForwardSteps}
                 >
                   <Forward className="h-4 w-4 mr-2" />
-                  Forward repair steps
+                  Forward to support
                 </Button>
               </div>
             </CardFooter>
@@ -623,7 +554,7 @@ export default function FixIssuePage() {
             <CardHeader>
               <CardTitle>Technical Details</CardTitle>
               <CardDescription>
-                Detailed technical information about this issue and the automated fix process.
+                Detailed technical information about this issue and the recommended fix process.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -653,7 +584,7 @@ export default function FixIssuePage() {
                           <h4 className="font-medium">
                             Step {index + 1}: {step.name}
                           </h4>
-                          <span className="text-sm text-gray-500">Est. time: {step.time}s</span>
+                          <span className="text-sm text-gray-500">Est. time: {step.time} min</span>
                         </div>
                         <p className="text-sm text-gray-600">
                           {step.name.includes("Analyzing")
@@ -686,13 +617,7 @@ export default function FixIssuePage() {
                 <div>
                   <h3 className="text-lg font-medium mb-2">System Impact</h3>
                   <p className="text-gray-700">
-                    This fix{" "}
-                    {status === "fixing"
-                      ? "will adjust"
-                      : status === "success"
-                        ? "has adjusted"
-                        : "would have adjusted"}{" "}
-                    configuration files and settings related to your
+                    This fix would adjust configuration files and settings related to your
                     {issueId.includes("ssl")
                       ? " SSL certificate and security settings"
                       : issueId.includes("dns")
@@ -702,8 +627,23 @@ export default function FixIssuePage() {
                           : issueId.includes("image")
                             ? " content delivery and image processing"
                             : " system performance and optimization parameters"}
-                    . No data will be lost during this process.
+                    . No data would be lost during this process.
                   </p>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                  <h3 className="text-lg font-medium mb-2">Manual Implementation</h3>
+                  <p className="text-gray-700 mb-3">
+                    To implement this fix manually, your server administrator would need to:
+                  </p>
+                  <ol className="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li>Access the server configuration through SSH or control panel</li>
+                    <li>Make a backup of the current configuration</li>
+                    <li>Apply the changes described in the technical fix details</li>
+                    <li>Test the changes in a staging environment if possible</li>
+                    <li>Deploy the changes to production</li>
+                    <li>Verify the issue has been resolved</li>
+                  </ol>
                 </div>
               </div>
             </CardContent>
