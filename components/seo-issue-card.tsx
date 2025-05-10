@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react"
+import { ChevronDown, ChevronUp, CheckSquare, Square, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { getSeverityColor, getSourceBadgeColor } from "@/lib/color-utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface SeoIssueProps {
   issue: {
@@ -28,7 +29,6 @@ interface SeoIssueProps {
 
 export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable = false }: SeoIssueProps) {
   const [expanded, setExpanded] = useState(false)
-  const [showSimpleExplanation, setShowSimpleExplanation] = useState(false)
 
   // Get the badge color for the impact level
   const getImpactBadgeColor = () => {
@@ -63,9 +63,27 @@ export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-              <h3 className="font-medium text-sm sm:text-base text-[#323048] truncate">{issue.title}</h3>
-              <div className="flex items-center mt-1 sm:mt-0">
+            {/* Title row with Fix Now button */}
+            <div className="flex flex-wrap items-center justify-between mb-2">
+              <div className="flex items-center mr-2">
+                <h3 className="font-medium text-sm sm:text-base text-[#323048] truncate">{issue.title}</h3>
+                {issue.simpleExplanation && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" className="p-0 h-auto ml-2">
+                          <HelpCircle className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black border border-gray-200 p-3 max-w-xs">
+                        <p className="font-medium mb-1">En términos simples:</p>
+                        <p>{issue.simpleExplanation}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
                 {issue.source && (
                   <Badge className={cn("mr-2", getSourceBadgeColor(issue.source))}>{issue.source}</Badge>
                 )}
@@ -75,40 +93,22 @@ export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable
                 >
                   {issue.severity.charAt(0).toUpperCase() + issue.severity.slice(1)}
                 </span>
+                <Button
+                  size="sm"
+                  className="text-xs sm:text-sm bg-[#537AEF] hover:bg-[#537AEF]/90 ml-2"
+                  onClick={() => (window.location.href = `/seo-analysis/fix/${issue.id}`)}
+                >
+                  Fix Now
+                </Button>
               </div>
             </div>
+
+            {/* Description */}
             <p className="text-xs sm:text-sm text-[#7D8496] mb-2">{issue.description}</p>
 
-            {showSimpleExplanation && issue.simpleExplanation && (
-              <div className="bg-white p-2 rounded-md mb-3 text-xs sm:text-sm text-[#323048] border border-[#EAEEF7]">
-                <strong>What this means:</strong> {issue.simpleExplanation}
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <Button
-                size="sm"
-                className="text-xs sm:text-sm bg-[#537AEF] hover:bg-[#537AEF]/90"
-                onClick={() => (window.location.href = `/seo-analysis/fix/${issue.id}`)}
-              >
-                Fix Now
-              </Button>
-              {issue.simpleExplanation && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowSimpleExplanation(!showSimpleExplanation)}
-                  className="text-xs sm:text-sm"
-                >
-                  {showSimpleExplanation ? "Hide explanation" : "Simple explanation"}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setExpanded(!expanded)}
-                className="sm:ml-auto text-xs sm:text-sm"
-              >
+            {/* View details button */}
+            <div className="flex justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setExpanded(!expanded)} className="text-xs sm:text-sm">
                 {expanded ? (
                   <>
                     <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
@@ -123,6 +123,7 @@ export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable
               </Button>
             </div>
 
+            {/* Expanded details */}
             {expanded && (
               <div className="mt-4 space-y-3 border-t pt-3">
                 {issue.affectedPages && issue.affectedPages.length > 0 && (

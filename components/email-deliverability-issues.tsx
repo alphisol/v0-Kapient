@@ -1,12 +1,16 @@
 "use client"
 
-import { SEOIssueCard } from "@/components/seo-issue-card"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { EmailIssueCard } from "@/components/email-issue-card"
 
 interface EmailDeliverabilityIssuesProps {
   domain: string
 }
 
 export function EmailDeliverabilityIssues({ domain }: EmailDeliverabilityIssuesProps) {
+  const [selectedIssues, setSelectedIssues] = useState<number[]>([])
+
   // This would be fetched from an API in a real implementation
   const issues = [
     {
@@ -45,10 +49,44 @@ export function EmailDeliverabilityIssues({ domain }: EmailDeliverabilityIssuesP
     },
   ]
 
+  const handleSelectIssue = (id: number, selected: boolean) => {
+    if (selected) {
+      setSelectedIssues([...selectedIssues, id])
+    } else {
+      setSelectedIssues(selectedIssues.filter((issueId) => issueId !== id))
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectedIssues.length === issues.length) {
+      setSelectedIssues([])
+    } else {
+      setSelectedIssues(issues.map((issue) => issue.id))
+    }
+  }
+
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Email Deliverability Issues</h2>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" onClick={handleSelectAll}>
+            {selectedIssues.length === issues.length ? "Deselect All" : "Select All"}
+          </Button>
+          <Button size="sm" disabled={selectedIssues.length === 0}>
+            Fix Selected ({selectedIssues.length})
+          </Button>
+        </div>
+      </div>
+
       {issues.map((issue) => (
-        <SEOIssueCard key={issue.id} issue={issue} />
+        <EmailIssueCard
+          key={issue.id}
+          issue={issue}
+          isSelectable={true}
+          isSelected={selectedIssues.includes(issue.id)}
+          onSelect={handleSelectIssue}
+        />
       ))}
     </div>
   )

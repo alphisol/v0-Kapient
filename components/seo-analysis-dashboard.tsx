@@ -8,9 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { SEOIssueCard } from "@/components/seo-issue-card"
 import { TechnicalSeo } from "@/components/technical-seo"
-import { KeywordAnalysis } from "@/components/keyword-analysis"
-import { ContentAnalysis } from "@/components/content-analysis"
-import { BacklinkAnalysis } from "@/components/backlink-analysis"
 import { getScoreColor } from "@/lib/color-utils"
 
 // Export both casing versions to fix the error
@@ -206,15 +203,6 @@ export function SEOAnalysisDashboard() {
           <TabsTrigger value="technical" className="text-xs sm:text-sm">
             Technical SEO
           </TabsTrigger>
-          <TabsTrigger value="keywords" className="text-xs sm:text-sm">
-            Keywords
-          </TabsTrigger>
-          <TabsTrigger value="content" className="text-xs sm:text-sm">
-            Content
-          </TabsTrigger>
-          <TabsTrigger value="backlinks" className="text-xs sm:text-sm">
-            Backlinks
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -327,18 +315,6 @@ export function SEOAnalysisDashboard() {
 
         <TabsContent value="technical">
           <TechnicalSeo />
-        </TabsContent>
-
-        <TabsContent value="keywords">
-          <KeywordAnalysis />
-        </TabsContent>
-
-        <TabsContent value="content">
-          <ContentAnalysis />
-        </TabsContent>
-
-        <TabsContent value="backlinks">
-          <BacklinkAnalysis />
         </TabsContent>
       </Tabs>
     </div>
