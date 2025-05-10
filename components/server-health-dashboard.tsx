@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { getScoreColor } from "@/lib/color-utils"
 import { useRouter } from "next/navigation"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Sample data structure based on what we can actually retrieve
 const serverHealthData = {
@@ -282,58 +283,6 @@ export function ServerHealthDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const router = useRouter()
 
-  // Add this near the top of the component with other state declarations
-  const [openTooltips, setOpenTooltips] = useState<Record<string, boolean>>({})
-
-  // Add a ref to detect clicks outside of tooltips
-  const tooltipRefs = useRef<Record<string, HTMLElement | null>>({})
-
-  // Add this function to toggle tooltips
-  const toggleTooltip = (id: string) => {
-    setOpenTooltips((prev) => {
-      // Close all other tooltips
-      const newState = Object.keys(prev).reduce(
-        (acc, key) => {
-          acc[key] = false
-          return acc
-        },
-        {} as Record<string, boolean>,
-      )
-
-      // Toggle the current tooltip
-      newState[id] = !prev[id]
-      return newState
-    })
-  }
-
-  // Add click outside handler to close tooltips
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Check if the click was outside all tooltip triggers and contents
-      const isOutside = Object.keys(openTooltips).every((id) => {
-        const tooltipRef = tooltipRefs.current[id]
-        return !tooltipRef || !tooltipRef.contains(event.target as Node)
-      })
-
-      if (isOutside) {
-        setOpenTooltips(
-          Object.keys(openTooltips).reduce(
-            (acc, key) => {
-              acc[key] = false
-              return acc
-            },
-            {} as Record<string, boolean>,
-          ),
-        )
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [openTooltips])
-
   // Function to handle "Fix Now" button click
   const handleFixNow = (issueId: string) => {
     setLoadingStates((prev) => ({ ...prev, overview: true }))
@@ -382,22 +331,6 @@ export function ServerHealthDashboard() {
         return "border-l-yellow-500"
       default:
         return "border-l-gray-500"
-    }
-  }
-
-  // Get category badge based on category
-  const getCategoryBadge = (category: string) => {
-    switch (category) {
-      case "SSL/TLS":
-        return <Badge className="bg-white text-blue-800 border border-blue-300">{category}</Badge>
-      case "DNS":
-        return <Badge className="bg-white text-purple-800 border border-purple-300">{category}</Badge>
-      case "Server":
-        return <Badge className="bg-white text-green-800 border border-green-300">{category}</Badge>
-      case "Security":
-        return <Badge className="bg-white text-red-800 border border-red-300">{category}</Badge>
-      default:
-        return <Badge className="bg-white text-gray-800 border border-gray-300">{category}</Badge>
     }
   }
 
@@ -467,6 +400,8 @@ export function ServerHealthDashboard() {
   }
 
   const renderIssueCard = (issue: any, category: string, subcategory: string) => {
+    const simpleExplanation = issue.simpleExplanation || "Here goes the explanation in simple terms"
+
     return (
       <Card key={issue.id} className={`mb-4 border-l-4 ${getImpactBorderColor(issue.impact)}`}>
         <CardContent className="p-4">
@@ -476,47 +411,35 @@ export function ServerHealthDashboard() {
               <div className="flex flex-wrap items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{issue.title}</span>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0 rounded-full hover:bg-transparent">
+                          <HelpCircle className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="bg-[#1a1a1a] text-white border-0 max-w-[200px] text-xs"
+                      >
+                        {simpleExplanation}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <Badge className={getImpactBadgeColor(issue.impact)}>
                     {issue.impact.charAt(0).toUpperCase() + issue.impact.slice(1)}
                   </Badge>
-                  {/* Remove the category and site-wide badges */}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`px-2 h-8 w-8 rounded-full ${
-                      openTooltips[issue.id] ? "bg-gray-100 border-gray-300" : ""
-                    }`}
-                    onClick={() => toggleTooltip(issue.id)}
-                    ref={(el) => (tooltipRefs.current[issue.id] = el)}
-                  >
-                    <HelpCircle className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-[#537AEF] hover:bg-[#537AEF]/90"
-                    onClick={() => handleFixNow(issue.id)}
-                  >
-                    Fix Now
-                  </Button>
-                </div>
+                <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => handleFixNow(issue.id)}>
+                  Fix Now
+                </Button>
               </div>
               <p className="text-sm text-[#7D8496] mb-2">{issue.description}</p>
-
-              {/* Mini card with simple explanation - only visible when tooltip is open */}
-              {openTooltips[issue.id] && (
-                <div className="bg-gray-50 border rounded-md p-3 mb-4 transition-all duration-300 ease-in-out">
-                  <p className="font-medium text-sm mb-1">In simple terms:</p>
-                  <p className="text-sm text-gray-600">{issue.simpleExplanation}</p>
-                </div>
-              )}
 
               {/* Expanded details section - always visible now */}
               <div className="border-t p-4 mt-4 bg-gray-50 rounded-md">
                 <div className="space-y-4">
-                  {/* Removed Detection Method section */}
-
                   <div>
                     <h4 className="text-sm font-medium mb-1">Recommendation</h4>
                     <p className="text-sm text-gray-600">{issue.recommendation}</p>
@@ -595,6 +518,8 @@ export function ServerHealthDashboard() {
 
   // Render a compact critical issue for the dashboard - new layout
   const renderCompactIssueCard = (issue: any) => {
+    const simpleExplanation = issue.simpleExplanation || "Here goes the explanation in simple terms"
+
     return (
       <div key={issue.id} className="border-b pb-4 pt-4 first:pt-0 last:border-b-0 last:pb-0">
         <div className="flex items-start gap-3">
@@ -602,28 +527,24 @@ export function ServerHealthDashboard() {
           <div className="flex-1">
             <div className="flex items-center flex-wrap gap-2 mb-2">
               <span className="font-medium">{issue.title}</span>
-              {/* Remove the category badges */}
-              <Button
-                variant="outline"
-                size="sm"
-                className={`px-2 h-8 w-8 rounded-full ml-auto ${
-                  openTooltips[issue.id] ? "bg-gray-100 border-gray-300" : ""
-                }`}
-                onClick={() => toggleTooltip(issue.id)}
-                ref={(el) => (tooltipRefs.current[issue.id] = el)}
-              >
-                <HelpCircle className="h-4 w-4" />
-              </Button>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0 rounded-full hover:bg-transparent">
+                      <HelpCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="bg-[#1a1a1a] text-white border-0 max-w-[200px] text-xs"
+                  >
+                    {simpleExplanation}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <p className="text-sm text-[#7D8496] mb-3">{issue.description}</p>
-
-            {/* Mini card with simple explanation - only visible when tooltip is open */}
-            {openTooltips[issue.id] && (
-              <div className="bg-gray-50 border rounded-md p-3 mb-3 transition-all duration-300 ease-in-out">
-                <p className="font-medium text-sm mb-1">In simple terms:</p>
-                <p className="text-sm text-gray-600">{issue.simpleExplanation}</p>
-              </div>
-            )}
 
             <div className="flex justify-end">
               <Button size="sm" className="bg-[#537AEF] hover:bg-[#537AEF]/90" onClick={() => handleFixNow(issue.id)}>
