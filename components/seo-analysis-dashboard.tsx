@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, ArrowRight, BarChart3, FileText, Search } from "lucide-react"
+import { AlertCircle, ArrowRight, BarChart3, Check, CheckSquare, FileText, Search, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -18,6 +18,7 @@ export const SeoAnalysisDashboard = SEOAnalysisDashboard
 
 export function SEOAnalysisDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [selectedIssues, setSelectedIssues] = useState<number[]>([])
 
   // Sample SEO data
   const seoData = {
@@ -69,6 +70,29 @@ export function SEOAnalysisDashboard() {
         "Without alt text, search engines can't understand your images, and you miss opportunities to rank in image search results.",
     },
   ]
+
+  const criticalIssues = technicalSEOIssues.filter((issue) => issue.severity === "critical")
+
+  const toggleIssueSelection = (id: number) => {
+    if (selectedIssues.includes(id)) {
+      setSelectedIssues(selectedIssues.filter((issueId) => issueId !== id))
+    } else {
+      setSelectedIssues([...selectedIssues, id])
+    }
+  }
+
+  const toggleAllIssues = () => {
+    if (selectedIssues.length === criticalIssues.length) {
+      setSelectedIssues([])
+    } else {
+      setSelectedIssues(criticalIssues.map((issue) => issue.id))
+    }
+  }
+
+  const handleFixSelected = () => {
+    console.log("Fixing selected issues:", selectedIssues)
+    // Implementation would go here
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-6 pt-16 md:pt-6">
@@ -125,21 +149,51 @@ export function SEOAnalysisDashboard() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-[#EC8290] mr-2" />
-            Critical SEO Issues
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardTitle className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-[#EC8290] mr-2" />
+              Critical SEO Issues
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={toggleAllIssues} className="text-xs">
+                {selectedIssues.length === criticalIssues.length ? (
+                  <>
+                    <CheckSquare className="h-4 w-4 mr-1 text-[#537AEF]" />
+                    Deselect All
+                  </>
+                ) : (
+                  <>
+                    <Square className="h-4 w-4 mr-1" />
+                    Select All
+                  </>
+                )}
+              </Button>
+              <Button
+                size="sm"
+                className="bg-[#537AEF] hover:bg-[#537AEF]/90 text-xs"
+                disabled={selectedIssues.length === 0}
+                onClick={handleFixSelected}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Fix Selected ({selectedIssues.length})
+              </Button>
+            </div>
+          </div>
           <CardDescription>
             These issues have the highest impact on your search engine rankings and should be addressed immediately
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {technicalSEOIssues
-              .filter((issue) => issue.severity === "critical")
-              .map((issue) => (
-                <SEOIssueCard key={issue.id} issue={issue} />
-              ))}
+            {criticalIssues.map((issue) => (
+              <SEOIssueCard
+                key={issue.id}
+                issue={issue}
+                isSelected={selectedIssues.includes(issue.id)}
+                onSelect={() => toggleIssueSelection(issue.id)}
+                isSelectable={true}
+              />
+            ))}
           </div>
         </CardContent>
       </Card>

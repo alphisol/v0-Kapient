@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, CheckCircle, FileCode, Globe, Loader2, Search, Server, ShieldCheck } from "lucide-react"
+import { ArrowRight, CheckCircle, Globe, Loader2, Search, Server, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -163,31 +163,14 @@ export function DashboardSummary() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-md gap-2 border-2 border-[#F8B43B]">
                     <div className="flex items-center">
                       <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 flex-shrink-0 border border-[#F8B43B]">
-                        <FileCode className="h-4 w-4 text-[#F8B43B]" />
-                      </div>
-                      <div>
-                        <div className="font-medium">Technical SEO Issues</div>
-                        <div className="text-sm text-[#7D8496]">3 critical, 5 warnings</div>
-                      </div>
-                    </div>
-                    <Link href="/technical-seo">
-                      <Button size="sm" variant="outline" className="border-[#F8B43B] text-[#F8B43B] hover:bg-amber-50">
-                        View
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-md gap-2 border-2 border-[#F8B43B]">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 flex-shrink-0 border border-[#F8B43B]">
                         <Search className="h-4 w-4 text-[#F8B43B]" />
                       </div>
                       <div>
-                        <div className="font-medium">SEO Issues</div>
-                        <div className="text-sm text-[#7D8496]">3 critical, 7 warnings</div>
+                        <div className="font-medium">SEO Factors</div>
+                        <div className="text-sm text-[#7D8496]">6 critical, 12 warnings</div>
                       </div>
                     </div>
-                    <Link href="/seo-factors">
+                    <Link href="/seo-analysis">
                       <Button size="sm" variant="outline" className="border-[#F8B43B] text-[#F8B43B] hover:bg-amber-50">
                         View
                       </Button>
