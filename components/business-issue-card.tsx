@@ -7,37 +7,37 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-interface SecurityIssue {
+interface BusinessIssue {
   id: number
   title: string
   description: string
-  severity: "critical" | "high" | "medium" | "low"
-  explanation: string
+  severity: "critical" | "warning" | "info"
+  recommendation: string
+  simpleExplanation: string
+  date: string
 }
 
-interface SecurityIssueCardProps {
-  issue: SecurityIssue
+interface BusinessIssueCardProps {
+  issue: BusinessIssue
   isSelectable?: boolean
   isSelected?: boolean
   onSelect?: (id: number, selected: boolean) => void
 }
 
-export function SecurityIssueCard({
+export function BusinessIssueCard({
   issue,
   isSelectable = false,
   isSelected = false,
   onSelect,
-}: SecurityIssueCardProps) {
+}: BusinessIssueCardProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "critical":
         return "border-l-red-500"
-      case "high":
-        return "border-l-red-500"
-      case "medium":
+      case "warning":
         return "border-l-orange-500"
-      case "low":
-        return "border-l-yellow-500"
+      case "info":
+        return "border-l-blue-500"
       default:
         return "border-l-gray-500"
     }
@@ -51,22 +51,16 @@ export function SecurityIssueCard({
             Critical
           </span>
         )
-      case "high":
-        return (
-          <span className="inline-flex items-center rounded-full border border-red-500 px-2.5 py-0.5 text-xs font-semibold text-red-500">
-            High
-          </span>
-        )
-      case "medium":
+      case "warning":
         return (
           <span className="inline-flex items-center rounded-full border border-orange-500 px-2.5 py-0.5 text-xs font-semibold text-orange-500">
-            Medium
+            Warning
           </span>
         )
-      case "low":
+      case "info":
         return (
-          <span className="inline-flex items-center rounded-full border border-yellow-500 px-2.5 py-0.5 text-xs font-semibold text-yellow-500">
-            Low
+          <span className="inline-flex items-center rounded-full border border-blue-500 px-2.5 py-0.5 text-xs font-semibold text-blue-500">
+            Info
           </span>
         )
       default:
@@ -105,25 +99,25 @@ export function SecurityIssueCard({
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs bg-white text-black border border-gray-200 p-3 shadow-lg">
                   <p className="font-medium mb-1">En términos simples:</p>
-                  <p className="text-sm">{issue.explanation}</p>
+                  <p className="text-sm">{issue.simpleExplanation}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
-              Security
+            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+              Business
             </span>
             {getSeverityBadge(issue.severity)}
             <Button asChild size="sm">
-              <Link href={`/security-compliance/fix/${issue.id}`}>Fix Now</Link>
+              <Link href={`/business-presence/fix/${issue.id}`}>Fix Now</Link>
             </Button>
           </div>
         </div>
         <p className="mt-2 text-sm text-gray-600">{issue.description}</p>
         <div className="mt-4 flex justify-end">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/security-compliance/issues/${issue.id}`}>View details</Link>
+            <Link href={`/business-presence/issues/${issue.id}`}>View details</Link>
           </Button>
         </div>
       </CardContent>

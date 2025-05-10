@@ -3,6 +3,7 @@
 import { CheckCircle, AlertCircle, XCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface EmailAuthenticationStatusProps {
   domain: string
@@ -12,21 +13,25 @@ export function EmailAuthenticationStatus({ domain }: EmailAuthenticationStatusP
   // This would be fetched from an API in a real implementation
   const authStatus = {
     spf: {
+      id: "spf-issue",
       status: "valid", // valid, invalid, missing
       record: "v=spf1 include:_spf.google.com ~all",
       description: "SPF record is properly configured and allows Google to send emails on your behalf.",
     },
     dkim: {
+      id: "dkim-issue",
       status: "missing", // valid, invalid, missing
       record: "",
       description: "DKIM record is missing. This authentication method helps prevent email spoofing.",
     },
     dmarc: {
+      id: "dmarc-issue",
       status: "invalid", // valid, invalid, missing
       record: "v=DMARC1; p=none; rua=mailto:dmarc@example.com",
       description: "DMARC policy is set to 'none', which only monitors but doesn't protect against spoofing.",
     },
     ssl: {
+      id: "ssl-issue",
       status: "valid", // valid, invalid, missing, expiring
       record: "Valid until Dec 15, 2023",
       description: "SSL certificate is valid and not expiring soon.",
@@ -90,8 +95,8 @@ export function EmailAuthenticationStatus({ domain }: EmailAuthenticationStatusP
                     <span className={getStatusClass(value.status)}>({getStatusText(value.status)})</span>
                   </h3>
                   {value.status !== "valid" && (
-                    <Button size="sm" className="text-xs">
-                      Fix Now
+                    <Button size="sm" className="text-xs" asChild>
+                      <Link href={`/email-deliverability/authentication/fix/${value.id}`}>Fix Now</Link>
                     </Button>
                   )}
                 </div>

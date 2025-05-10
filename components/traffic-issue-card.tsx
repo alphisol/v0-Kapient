@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-interface SecurityIssue {
+interface TrafficIssue {
   id: number
   title: string
   description: string
@@ -15,19 +15,14 @@ interface SecurityIssue {
   explanation: string
 }
 
-interface SecurityIssueCardProps {
-  issue: SecurityIssue
+interface TrafficIssueCardProps {
+  issue: TrafficIssue
   isSelectable?: boolean
   isSelected?: boolean
   onSelect?: (id: number, selected: boolean) => void
 }
 
-export function SecurityIssueCard({
-  issue,
-  isSelectable = false,
-  isSelected = false,
-  onSelect,
-}: SecurityIssueCardProps) {
+export function TrafficIssueCard({ issue, isSelectable = false, isSelected = false, onSelect }: TrafficIssueCardProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "critical":
@@ -111,19 +106,19 @@ export function SecurityIssueCard({
             </TooltipProvider>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
-              Security
+            <span className="inline-flex items-center rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-teal-800">
+              Traffic
             </span>
             {getSeverityBadge(issue.severity)}
             <Button asChild size="sm">
-              <Link href={`/security-compliance/fix/${issue.id}`}>Fix Now</Link>
+              <Link href={`/website-traffic/fix/${issue.id}`}>Fix Now</Link>
             </Button>
           </div>
         </div>
         <p className="mt-2 text-sm text-gray-600">{issue.description}</p>
         <div className="mt-4 flex justify-end">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/security-compliance/issues/${issue.id}`}>View details</Link>
+            <Link href={`/website-traffic/issues/${issue.id}`}>View details</Link>
           </Button>
         </div>
       </CardContent>

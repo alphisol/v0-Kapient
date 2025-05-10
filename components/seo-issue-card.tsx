@@ -30,6 +30,9 @@ interface SeoIssueProps {
 export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable = false }: SeoIssueProps) {
   const [expanded, setExpanded] = useState(false)
 
+  // Ensure simpleExplanation always has a value
+  const simpleExplanation = issue.simpleExplanation || "Here goes the explanation in simple terms"
+
   // Get the badge color for the impact level
   const getImpactBadgeColor = () => {
     switch (issue.severity) {
@@ -67,21 +70,23 @@ export function SEOIssueCard({ issue, isSelected = false, onSelect, isSelectable
             <div className="flex flex-wrap items-center justify-between mb-2">
               <div className="flex items-center mr-2">
                 <h3 className="font-medium text-sm sm:text-base text-[#323048] truncate">{issue.title}</h3>
-                {issue.simpleExplanation && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="sm" className="p-0 h-auto ml-2">
-                          <HelpCircle className="h-4 w-4 text-gray-400" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black border border-gray-200 p-3 max-w-xs">
-                        <p className="font-medium mb-1">En términos simples:</p>
-                        <p>{issue.simpleExplanation}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {/* Always show the tooltip button since simpleExplanation is always defined now */}
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" className="p-0 h-auto ml-2 hover:bg-transparent">
+                        <HelpCircle className="h-4 w-4 text-gray-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="bg-[#1a1a1a] text-white border-none p-2 max-w-[200px] text-sm"
+                    >
+                      {simpleExplanation}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <div className="flex items-center gap-2">
                 {issue.source && (

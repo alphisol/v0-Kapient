@@ -1,8 +1,6 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
 import Link from "next/link"
 import { HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,7 +13,7 @@ interface EmailIssue {
   description: string
   severity: "critical" | "warning" | "info"
   recommendation: string
-  simpleExplanation: string
+  simpleExplanation?: string
   date: string
 }
 
@@ -27,7 +25,8 @@ interface EmailIssueCardProps {
 }
 
 export function EmailIssueCard({ issue, isSelectable = false, isSelected = false, onSelect }: EmailIssueCardProps) {
-  const [showTooltip, setShowTooltip] = useState(false)
+  // Ensure simpleExplanation always has a value
+  const simpleExplanation = issue.simpleExplanation || "Here goes the explanation in simple terms"
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -88,23 +87,20 @@ export function EmailIssueCard({ issue, isSelectable = false, isSelected = false
               </div>
             )}
             <h3 className="font-medium">{issue.title}</h3>
-            <TooltipProvider>
+            <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-full p-0"
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                  >
+                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full p-0 hover:bg-transparent">
                     <HelpCircle className="h-4 w-4" />
                     <span className="sr-only">Info</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs bg-white text-black border border-gray-200 p-3 shadow-lg">
-                  <p className="font-medium mb-1">En términos simples:</p>
-                  <p className="text-sm">{issue.simpleExplanation}</p>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="max-w-[200px] bg-[#1a1a1a] text-white border-none p-2 shadow-lg"
+                >
+                  <p className="text-sm">{simpleExplanation}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

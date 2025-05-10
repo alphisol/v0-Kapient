@@ -7,7 +7,6 @@ import { EmailAuthenticationStatus } from "@/components/email-authentication-sta
 import { BlacklistStatus } from "@/components/blacklist-status"
 import { EmailReputationScore } from "@/components/email-reputation-score"
 import { EmailDeliverabilityIssues } from "@/components/email-deliverability-issues"
-import { EmailReputationSection } from "@/components/email-reputation-section"
 
 export function EmailDeliverabilityDashboard() {
   const [domain, setDomain] = useState("example.com")
@@ -56,11 +55,10 @@ export function EmailDeliverabilityDashboard() {
       </div>
 
       <Tabs defaultValue="issues">
-        <TabsList className="grid grid-cols-4 w-full max-w-md">
+        <TabsList className="grid grid-cols-3 w-full max-w-md">
           <TabsTrigger value="issues">Issues</TabsTrigger>
           <TabsTrigger value="authentication">Authentication</TabsTrigger>
           <TabsTrigger value="blacklists">Blacklists</TabsTrigger>
-          <TabsTrigger value="reputation">Reputation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="issues" className="mt-6">
@@ -97,10 +95,6 @@ export function EmailDeliverabilityDashboard() {
               <BlacklistStatus domain={domain} />
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="reputation" className="mt-6">
-          <EmailReputationSection domain={domain} />
         </TabsContent>
       </Tabs>
     </div>
